@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gen 1 Encounter Map (Leaflet)</title>
+
+    <!-- Leaflet -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Your data -->
+    <script src="./data.js"></script>
+
+    <style>
+      html, body { height: 100%; margin: 0; }
+      #app { height: 100%; display: grid; grid-template-rows: auto 1fr; }
+      #toolbar {
+        display: flex; gap: 12px; align-items: center;
+        padding: 10px 12px; border-bottom: 1px solid #e5e5e5;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      }
+      #map { height: 100%; }
+      select, input {
+        padding: 6px 8px; border: 1px solid #ccc; border-radius: 8px;
+        font-size: 14px;
+      }
+      .muted { color: #666; font-size: 13px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <div id="toolbar">
+        <div>
+          <label for="pokemonSelect">Pokémon:</label>
+          <select id="pokemonSelect"></select>
+        </div>
+
+        <div class="muted" id="summary"></div>
+      </div>
+
+      <div id="map"></div>
+    </div>
+
+    <script>
+      // --- 1) Configure your image map ---
+      // Replace with your actual image size in pixels:
+      const IMAGE_WIDTH = 1000;
+      const IMAGE_HEIGHT = 1000;
+
+      // Leaflet uses [y, x] for "LatLng"-like pairs in CRS.Simple.
+      // We'll store data as [x, y], then convert with toLatLng().
+      const toLatLng = ([x, y]) => [y, x];
+
+      const bounds = [
+        [0, 0],
+        [IMAGE_HEIGHT, IMAGE_WIDTH],
+      ];
+
+      const map = L.map("map", {
+        crs: L.CRS.Simple,
+        minZoom: -2,
+        maxZoom: 2,
+        zoomControl: true,
+      });
+
+      // Your Kanto map image (local file)
+      L.imageOverlay("./kanto.png", bounds).addTo(map);
+      map.fitBounds(bounds);
+
+      // --- 2) Build Pokémon list for the dropdown ---
+      const allPokemon = new Set();
+      for (const loc of window.ENCOUNTERS) {
+        for (const e of loc.encounters) allPokemon.add(e.pokemon);
+      }
+      const pokemonList = ["(All)"].concat([...allPokemon].sort((a, b) => a.localeCompare(b)));
+
+      const select = document.getElementById("pokemonSelect");
+      for (const name of pokemonList) {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      }
+
+      const summary = document.getElementById("summary");
+
+      // --- 3) Marker rendering + filtering ---
+      const markersLayer = L.layerGroup().addTo(map);
+
+      function popupHTML(location) {
+        // Sort encounters high -> low for nice display
+        const rows = [...location.encounters].sort((a, b) => b.rate - a.rate);
+        return `
+          <div style="min-width: 200px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;">
+            <div style="font-weight: 700; margin-bottom: 6px;">${location.name}</div>
+            <div style="font-size: 13px; color: #444; margin-bottom: 8px;">Wild encounters (sample)</div>
+            <div style="font-size: 13px;">
+              ${rows.map(r => `<div>${r.pokemon} — <b>${r.rate}%</b></div>`).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      function locationHasPokemon(location, pokemonName) {
+        if (pokemonName === "(All)") return true;
+        return location.encounters.some(e => e.pokemon === pokemonName);
+      }
+
+      function render(pokemonName) {
+        markersLayer.clearLayers();
+
+        const visible = window.ENCOUNTERS.filter(loc => locationHasPokemon(loc, pokemonName));
+
+        for (const loc of visible) {
+          const marker = L.circleMarker(toLatLng(loc.xy), {
+            radius: 8,
+            weight: 2,
+            fillOpacity: 0.9,
+          });
+
+          marker.bindTooltip(loc.name, { direction: "top", offset: [0, -6] });
+          marker.bindPopup(popupHTML(loc));
+          marker.addTo(markersLayer);
+        }
+
+        summary.textContent =
+          pokemonName === "(All)"
+            ? `${visible.length} locations shown`
+            : `${visible.length} locations with ${pokemonName}`;
+      }
+
+      select.addEventListener("change", () => render(select.value));
+
+      // Initial render
+      render("(All)");
+    </script>
+  </body>
+</html>
