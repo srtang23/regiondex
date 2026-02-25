@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coordinate Helper - Click to Get Coordinates</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+      html, body { height: 100%; margin: 0; }
+      #app { height: 100%; display: grid; grid-template-rows: auto 1fr; }
+      #toolbar {
+        display: flex; gap: 12px; align-items: center;
+        padding: 10px 12px; border-bottom: 1px solid #e5e5e5;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      }
+      #map { height: 100%; }
+      #coords {
+        font-weight: bold;
+        color: #2563eb;
+      }
+      .info {
+        color: #666;
+        font-size: 13px;
+      }
+
+      /* High-quality image rendering */
+      .leaflet-image-layer {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+      }
+
+      .leaflet-container {
+        image-rendering: -webkit-optimize-contrast;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="toolbar">
+        <span class="info">Click on the map to get coordinates:</span>
+        <span id="coords">[x, y]</span>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <script>
+      const IMAGE_WIDTH = 6000;
+      const IMAGE_HEIGHT = 6000;
+
+      const toLatLng = ([x, y]) => [y, x];
+      const fromLatLng = (latlng) => [Math.round(latlng.lng), Math.round(latlng.lat)];
+
+      const bounds = [[0, 0], [IMAGE_HEIGHT, IMAGE_WIDTH]];
+
+      const map = L.map("map", {
+        crs: L.CRS.Simple,
+        minZoom: -3,  // Allow zooming out to see full image
+        maxZoom: 5,   // Allow zooming in for detail
+        zoomControl: true,
+        zoomSnap: 0.25,
+        zoomDelta: 0.5,
+      });
+
+      L.imageOverlay("./map.gif", bounds, {
+        className: 'high-quality-image'
+      }).addTo(map);
+
+      // Fit the entire image in the viewport
+      map.fitBounds(bounds, {
+        padding: [0, 0],
+        maxZoom: 1  // Show full image initially
+      });
+
+      // Add grid overlay with multiple levels for better reference
+      const majorGridSpacing = 500;   // Major grid lines every 500px
+      const minorGridSpacing = 50;    // Minor grid lines every 50px (more dense)
+      const labelSpacing = 500;       // Show labels every 500 pixels
+
+      // Minor grid lines (thin, more transparent)
+      for (let x = 0; x <= IMAGE_WIDTH; x += minorGridSpacing) {
+        const isMajor = x % majorGridSpacing === 0;
+        L.polyline([[0, x], [IMAGE_HEIGHT, x]], {
+          color: isMajor ? 'red' : '#ff9999',
+          weight: isMajor ? 2 : 1,
+          opacity: isMajor ? 0.4 : 0.15
+        }).addTo(map);
+
+        // Add labels to major lines
+        if (x % labelSpacing === 0) {
+          // Top label
+          L.marker([100, x], {
+            icon: L.divIcon({
+              className: 'grid-label',
+              html: `<div style="color: red; font-weight: bold; font-size: 12px; background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; border: 1px solid red;">${x}</div>`,
+              iconSize: [60, 20]
+            })
+          }).addTo(map);
+
+          // Bottom label
+          L.marker([IMAGE_HEIGHT - 100, x], {
+            icon: L.divIcon({
+              className: 'grid-label',
+              html: `<div style="color: red; font-weight: bold; font-size: 12px; background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; border: 1px solid red;">${x}</div>`,
+              iconSize: [60, 20]
+            })
+          }).addTo(map);
+        }
+      }
+
+      for (let y = 0; y <= IMAGE_HEIGHT; y += minorGridSpacing) {
+        const isMajor = y % majorGridSpacing === 0;
+        L.polyline([[y, 0], [y, IMAGE_WIDTH]], {
+          color: isMajor ? 'red' : '#ff9999',
+          weight: isMajor ? 2 : 1,
+          opacity: isMajor ? 0.4 : 0.15
+        }).addTo(map);
+
+        // Add labels to major lines
+        if (y % labelSpacing === 0) {
+          // Left label
+          L.marker([y, 100], {
+            icon: L.divIcon({
+              className: 'grid-label',
+              html: `<div style="color: red; font-weight: bold; font-size: 12px; background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; border: 1px solid red;">${y}</div>`,
+              iconSize: [60, 20]
+            })
+          }).addTo(map);
+
+          // Right label
+          L.marker([y, IMAGE_WIDTH - 100], {
+            icon: L.divIcon({
+              className: 'grid-label',
+              html: `<div style="color: red; font-weight: bold; font-size: 12px; background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; border: 1px solid red;">${y}</div>`,
+              iconSize: [60, 20]
+            })
+          }).addTo(map);
+        }
+      }
+
+      const coordsDisplay = document.getElementById('coords');
+      let currentMarker = null;
+
+      map.on('click', (e) => {
+        const coords = fromLatLng(e.latlng);
+        coordsDisplay.textContent = `[${coords[0]}, ${coords[1]}]`;
+
+        // Remove previous marker
+        if (currentMarker) {
+          map.removeLayer(currentMarker);
+        }
+
+        // Add new marker
+        currentMarker = L.circleMarker(e.latlng, {
+          radius: 8,
+          weight: 2,
+          color: '#ff0000',
+          fillColor: '#ff6666',
+          fillOpacity: 0.7,
+        }).addTo(map);
+
+        console.log(`Clicked at: [${coords[0]}, ${coords[1]}]`);
+      });
+    </script>
+  </body>
+</html>

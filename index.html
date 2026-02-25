@@ -23,12 +23,75 @@
         padding: 10px 12px; border-bottom: 1px solid #e5e5e5;
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       }
-      #map { height: 100%; }
+      #map { height: 100%; position: relative; }
       select, input {
         padding: 6px 8px; border: 1px solid #ccc; border-radius: 8px;
         font-size: 14px;
       }
       .muted { color: #666; font-size: 13px; }
+
+      #legend {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: white;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        z-index: 1000;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        font-size: 12px;
+      }
+
+      #legend h4 {
+        margin: 0 0 8px 0;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+
+      .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid;
+      }
+
+      /* High-quality image rendering - prevent blur on zoom */
+      .high-quality-map {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        image-rendering: pixelated;
+        -ms-interpolation-mode: nearest-neighbor;
+      }
+
+      /* Additional rendering improvements */
+      .leaflet-image-layer {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+      }
+
+      /* Improve overall map container */
+      .leaflet-container {
+        image-rendering: -webkit-optimize-contrast;
+      }
+
+      /* For canvas elements if used */
+      .leaflet-overlay-pane canvas {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+      }
+
+      /* Prevent blur during zoom transitions */
+      .leaflet-zoom-animated {
+        will-change: transform;
+      }
     </style>
   </head>
 
@@ -41,16 +104,58 @@
         </div>
 
         <div class="muted" id="summary"></div>
+
+        <div style="margin-left: auto;">
+          <button id="toggleLegend" style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">
+            Toggle Legend
+          </button>
+        </div>
       </div>
 
-      <div id="map"></div>
+      <div id="map">
+        <div id="legend">
+          <h4>Location Types</h4>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #44dd66; border-color: #22aa44;"></div>
+            <span>Routes</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #aa7744; border-color: #885522;"></div>
+            <span>Caves/Tunnels</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #aa66dd; border-color: #8844aa;"></div>
+            <span>Towers</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #ffaa22; border-color: #dd8800;"></div>
+            <span>Safari Zone</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #4488dd; border-color: #2266aa;"></div>
+            <span>Water Areas</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #44aa66; border-color: #228844;"></div>
+            <span>Forests</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #dd4466; border-color: #aa2244;"></div>
+            <span>Buildings</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #ddaa44; border-color: #aa8822;"></div>
+            <span>Victory Road</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
       // --- 1) Configure your image map ---
-      // Replace with your actual image size in pixels:
-      const IMAGE_WIDTH = 1000;
-      const IMAGE_HEIGHT = 1000;
+      // Using map.gif (6000x6000) for high quality zooming
+      const IMAGE_WIDTH = 6000;
+      const IMAGE_HEIGHT = 6000;
 
       // Leaflet uses [y, x] for "LatLng"-like pairs in CRS.Simple.
       // We'll store data as [x, y], then convert with toLatLng().
@@ -63,14 +168,44 @@
 
       const map = L.map("map", {
         crs: L.CRS.Simple,
-        minZoom: -2,
-        maxZoom: 2,
+        minZoom: -3,  // Allow zooming out more to see full image
+        maxZoom: 5,  // Increased max zoom for better detail
         zoomControl: true,
+        zoomSnap: 0.25,  // Smoother zoom increments
+        zoomDelta: 0.5,  // Smoother zoom steps
+        preferCanvas: true,  // Use canvas renderer for better performance
       });
 
-      // Your Kanto map image (local file)
-      L.imageOverlay("./kanto.png", bounds).addTo(map);
-      map.fitBounds(bounds);
+      // Your Kanto map image with optimized rendering
+      L.imageOverlay("./map.gif", bounds, {
+        opacity: 1,
+        className: 'high-quality-map',
+      }).addTo(map);
+
+      // Fit the entire image in the viewport
+      map.fitBounds(bounds, {
+        padding: [0, 0],  // No padding
+        maxZoom: 1  // Don't zoom in too much initially
+      });
+
+      // Optional: Add grid overlay for debugging coordinates
+      // Uncomment to see grid lines
+      /*
+      for (let x = 0; x <= IMAGE_WIDTH; x += 100) {
+        L.polyline([[0, x], [IMAGE_HEIGHT, x]], {
+          color: 'red',
+          weight: 1,
+          opacity: 0.3
+        }).addTo(map);
+      }
+      for (let y = 0; y <= IMAGE_HEIGHT; y += 100) {
+        L.polyline([[y, 0], [y, IMAGE_WIDTH]], {
+          color: 'red',
+          weight: 1,
+          opacity: 0.3
+        }).addTo(map);
+      }
+      */
 
       // --- 2) Build Pokémon list for the dropdown ---
       const allPokemon = new Set();
@@ -117,10 +252,42 @@
         const visible = window.ENCOUNTERS.filter(loc => locationHasPokemon(loc, pokemonName));
 
         for (const loc of visible) {
+          // Color code by location type
+          let color = '#3388ff';
+          let fillColor = '#3388ff';
+
+          if (loc.name.includes('Route')) {
+            color = '#22aa44';
+            fillColor = '#44dd66';
+          } else if (loc.name.includes('Cave') || loc.name.includes('Tunnel')) {
+            color = '#885522';
+            fillColor = '#aa7744';
+          } else if (loc.name.includes('Tower')) {
+            color = '#8844aa';
+            fillColor = '#aa66dd';
+          } else if (loc.name.includes('Safari')) {
+            color = '#dd8800';
+            fillColor = '#ffaa22';
+          } else if (loc.name.includes('Seafoam') || loc.name.includes('Sea Route')) {
+            color = '#2266aa';
+            fillColor = '#4488dd';
+          } else if (loc.name.includes('Forest')) {
+            color = '#228844';
+            fillColor = '#44aa66';
+          } else if (loc.name.includes('Mansion') || loc.name.includes('Power Plant')) {
+            color = '#aa2244';
+            fillColor = '#dd4466';
+          } else if (loc.name.includes('Victory Road')) {
+            color = '#aa8822';
+            fillColor = '#ddaa44';
+          }
+
           const marker = L.circleMarker(toLatLng(loc.xy), {
             radius: 8,
             weight: 2,
-            fillOpacity: 0.9,
+            color: color,
+            fillColor: fillColor,
+            fillOpacity: 0.7,
           });
 
           marker.bindTooltip(loc.name, { direction: "top", offset: [0, -6] });
@@ -136,8 +303,40 @@
 
       select.addEventListener("change", () => render(select.value));
 
+      // Toggle legend visibility
+      const toggleLegendBtn = document.getElementById("toggleLegend");
+      const legend = document.getElementById("legend");
+      let legendVisible = true;
+
+      toggleLegendBtn.addEventListener("click", () => {
+        legendVisible = !legendVisible;
+        legend.style.display = legendVisible ? "block" : "none";
+      });
+
       // Initial render
       render("(All)");
+
+      // Log some statistics
+      console.log(`Loaded ${window.ENCOUNTERS.length} locations`);
+      console.log(`Total Pokémon species: ${allPokemon.size}`);
+
+      // Count location types
+      const locationTypes = {};
+      window.ENCOUNTERS.forEach(loc => {
+        let type = 'Other';
+        if (loc.name.includes('Route')) type = 'Route';
+        else if (loc.name.includes('Cave') || loc.name.includes('Tunnel')) type = 'Cave/Tunnel';
+        else if (loc.name.includes('Tower')) type = 'Tower';
+        else if (loc.name.includes('Safari')) type = 'Safari Zone';
+        else if (loc.name.includes('Seafoam') || loc.name.includes('Sea Route')) type = 'Water Area';
+        else if (loc.name.includes('Forest')) type = 'Forest';
+        else if (loc.name.includes('Mansion') || loc.name.includes('Power Plant')) type = 'Building';
+        else if (loc.name.includes('Victory Road')) type = 'Victory Road';
+
+        locationTypes[type] = (locationTypes[type] || 0) + 1;
+      });
+
+      console.log('Location breakdown:', locationTypes);
     </script>
   </body>
 </html>
