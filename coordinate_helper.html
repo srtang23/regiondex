@@ -45,8 +45,8 @@
     </div>
 
     <script>
-      const IMAGE_WIDTH = 6000;
-      const IMAGE_HEIGHT = 6000;
+      const IMAGE_WIDTH = 7700;
+      const IMAGE_HEIGHT = 6400;
 
       const toLatLng = ([x, y]) => [y, x];
       const fromLatLng = (latlng) => [Math.round(latlng.lng), Math.round(latlng.lat)];
@@ -62,7 +62,7 @@
         zoomDelta: 0.5,
       });
 
-      L.imageOverlay("./map.gif", bounds, {
+      L.imageOverlay("./full_kanto_map.png", bounds, {
         className: 'high-quality-image'
       }).addTo(map);
 

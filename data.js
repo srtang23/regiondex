@@ -5,8 +5,8 @@ window.ENCOUNTERS = [
     "id": "cerulean-cave-1f",
     "name": "Cerulean Cave 1f",
     "xy": [
-      4080,
-      2760
+      5236,
+      2944
     ],
     "encounters": [
       {
@@ -55,8 +55,8 @@ window.ENCOUNTERS = [
     "id": "cerulean-cave-2f",
     "name": "Cerulean Cave 2f",
     "xy": [
-      4080,
-      2760
+      5236,
+      2944
     ],
     "encounters": [
       {
@@ -101,8 +101,8 @@ window.ENCOUNTERS = [
     "id": "cerulean-cave-b1f",
     "name": "Cerulean Cave B1f",
     "xy": [
-      4080,
-      2760
+      5236,
+      2944
     ],
     "encounters": [
       {
@@ -143,8 +143,8 @@ window.ENCOUNTERS = [
     "id": "digletts-cave-area",
     "name": "Digletts Cave",
     "xy": [
-      3120,
-      3360
+      4004,
+      3584
     ],
     "encounters": [
       {
@@ -161,8 +161,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-1-area",
     "name": "Kanto Route 1",
     "xy": [
-      3720,
-      4680
+      4774,
+      4992
     ],
     "encounters": [
       {
@@ -179,8 +179,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-10-area",
     "name": "Kanto Route 10",
     "xy": [
-      4680,
-      2520
+      6006,
+      2688
     ],
     "encounters": [
       {
@@ -201,8 +201,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-11-area",
     "name": "Kanto Route 11",
     "xy": [
-      4320,
-      3600
+      5544,
+      3840
     ],
     "encounters": [
       {
@@ -223,8 +223,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-12-area",
     "name": "Kanto Route 12",
     "xy": [
-      4680,
-      3900
+      6006,
+      4160
     ],
     "encounters": [
       {
@@ -249,8 +249,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-13-area",
     "name": "Kanto Route 13",
     "xy": [
-      4320,
-      4320
+      5544,
+      4608
     ],
     "encounters": [
       {
@@ -279,8 +279,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-14-area",
     "name": "Kanto Route 14",
     "xy": [
-      4080,
-      4560
+      5236,
+      4864
     ],
     "encounters": [
       {
@@ -313,8 +313,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-15-area",
     "name": "Kanto Route 15",
     "xy": [
-      3840,
-      4560
+      4928,
+      4864
     ],
     "encounters": [
       {
@@ -347,8 +347,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-16-area",
     "name": "Kanto Route 16",
     "xy": [
-      2880,
-      3240
+      3696,
+      3456
     ],
     "encounters": [
       {
@@ -373,8 +373,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-17-area",
     "name": "Kanto Route 17",
     "xy": [
-      2760,
-      3720
+      3542,
+      3968
     ],
     "encounters": [
       {
@@ -399,8 +399,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-18-area",
     "name": "Kanto Route 18",
     "xy": [
-      3000,
-      4200
+      3850,
+      4480
     ],
     "encounters": [
       {
@@ -425,8 +425,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-2-south-towards-viridian-city",
     "name": "Kanto Route 2 South Towards Viridian City",
     "xy": [
-      3480,
-      4320
+      4466,
+      4608
     ],
     "encounters": [
       {
@@ -447,8 +447,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-22-area",
     "name": "Kanto Route 22",
     "xy": [
-      2460,
-      4140
+      3157,
+      4416
     ],
     "encounters": [
       {
@@ -473,8 +473,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-23-area",
     "name": "Kanto Route 23",
     "xy": [
-      2280,
-      3600
+      2926,
+      3840
     ],
     "encounters": [
       {
@@ -503,8 +503,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-24-area",
     "name": "Kanto Route 24",
     "xy": [
-      4080,
-      2520
+      5236,
+      2688
     ],
     "encounters": [
       {
@@ -533,8 +533,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-25-area",
     "name": "Kanto Route 25",
     "xy": [
-      4440,
-      2280
+      5698,
+      2432
     ],
     "encounters": [
       {
@@ -571,8 +571,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-3-area",
     "name": "Kanto Route 3",
     "xy": [
-      4320,
-      3720
+      5544,
+      3968
     ],
     "encounters": [
       {
@@ -593,8 +593,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-4-area",
     "name": "Kanto Route 4",
     "xy": [
-      4920,
-      3480
+      6314,
+      3712
     ],
     "encounters": [
       {
@@ -615,8 +615,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-5-area",
     "name": "Kanto Route 5",
     "xy": [
-      3720,
-      3120
+      4774,
+      3328
     ],
     "encounters": [
       {
@@ -637,8 +637,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-6-area",
     "name": "Kanto Route 6",
     "xy": [
-      3720,
-      3600
+      4774,
+      3840
     ],
     "encounters": [
       {
@@ -659,8 +659,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-7-area",
     "name": "Kanto Route 7",
     "xy": [
-      3240,
-      3120
+      4158,
+      3328
     ],
     "encounters": [
       {
@@ -685,8 +685,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-8-area",
     "name": "Kanto Route 8",
     "xy": [
-      4200,
-      3120
+      5390,
+      3328
     ],
     "encounters": [
       {
@@ -711,8 +711,8 @@ window.ENCOUNTERS = [
     "id": "kanto-route-9-area",
     "name": "Kanto Route 9",
     "xy": [
-      4680,
-      2880
+      6006,
+      3072
     ],
     "encounters": [
       {
@@ -733,8 +733,8 @@ window.ENCOUNTERS = [
     "id": "kanto-safari-zone-area-1-east",
     "name": "Kanto Safari Zone Area 1 East",
     "xy": [
-      3120,
-      4200
+      4004,
+      4480
     ],
     "encounters": [
       {
@@ -779,8 +779,8 @@ window.ENCOUNTERS = [
     "id": "kanto-safari-zone-area-2-north",
     "name": "Kanto Safari Zone Area 2 North",
     "xy": [
-      3000,
-      4080
+      3850,
+      4352
     ],
     "encounters": [
       {
@@ -825,8 +825,8 @@ window.ENCOUNTERS = [
     "id": "kanto-safari-zone-area-3-west",
     "name": "Kanto Safari Zone Area 3 West",
     "xy": [
-      2880,
-      4200
+      3696,
+      4480
     ],
     "encounters": [
       {
@@ -871,8 +871,8 @@ window.ENCOUNTERS = [
     "id": "kanto-safari-zone-middle",
     "name": "Kanto Safari Zone Middle",
     "xy": [
-      3000,
-      4200
+      3850,
+      4480
     ],
     "encounters": [
       {
@@ -917,8 +917,8 @@ window.ENCOUNTERS = [
     "id": "kanto-sea-route-21-area",
     "name": "Kanto Sea Route 21",
     "xy": [
-      3120,
-      4800
+      4004,
+      5120
     ],
     "encounters": [
       {
@@ -947,8 +947,8 @@ window.ENCOUNTERS = [
     "id": "kanto-victory-road-2-1f",
     "name": "Kanto Victory Road 2 1f",
     "xy": [
-      2160,
-      3480
+      2772,
+      3712
     ],
     "encounters": [
       {
@@ -989,8 +989,8 @@ window.ENCOUNTERS = [
     "id": "kanto-victory-road-2-2f",
     "name": "Kanto Victory Road 2 2f",
     "xy": [
-      2160,
-      3480
+      2772,
+      3712
     ],
     "encounters": [
       {
@@ -1031,8 +1031,8 @@ window.ENCOUNTERS = [
     "id": "kanto-victory-road-2-3f",
     "name": "Kanto Victory Road 2 3f",
     "xy": [
-      2160,
-      3480
+      2772,
+      3712
     ],
     "encounters": [
       {
@@ -1073,8 +1073,8 @@ window.ENCOUNTERS = [
     "id": "mt-moon-1f",
     "name": "Mt Moon 1f",
     "xy": [
-      3840,
-      3720
+      4928,
+      3968
     ],
     "encounters": [
       {
@@ -1099,8 +1099,8 @@ window.ENCOUNTERS = [
     "id": "mt-moon-b1f",
     "name": "Mt Moon B1f",
     "xy": [
-      3840,
-      3720
+      4928,
+      3968
     ],
     "encounters": [
       {
@@ -1125,8 +1125,8 @@ window.ENCOUNTERS = [
     "id": "mt-moon-b2f",
     "name": "Mt Moon B2f",
     "xy": [
-      3840,
-      3720
+      4928,
+      3968
     ],
     "encounters": [
       {
@@ -1151,8 +1151,8 @@ window.ENCOUNTERS = [
     "id": "pokemon-mansion-1f",
     "name": "Pokemon Mansion 1f",
     "xy": [
-      3120,
-      5100
+      4004,
+      5440
     ],
     "encounters": [
       {
@@ -1185,8 +1185,8 @@ window.ENCOUNTERS = [
     "id": "pokemon-mansion-2f",
     "name": "Pokemon Mansion 2f",
     "xy": [
-      3120,
-      5100
+      4004,
+      5440
     ],
     "encounters": [
       {
@@ -1219,8 +1219,8 @@ window.ENCOUNTERS = [
     "id": "pokemon-mansion-3f",
     "name": "Pokemon Mansion 3f",
     "xy": [
-      3120,
-      5100
+      4004,
+      5440
     ],
     "encounters": [
       {
@@ -1253,8 +1253,8 @@ window.ENCOUNTERS = [
     "id": "pokemon-mansion-b1f",
     "name": "Pokemon Mansion B1f",
     "xy": [
-      3120,
-      5100
+      4004,
+      5440
     ],
     "encounters": [
       {
@@ -1287,8 +1287,8 @@ window.ENCOUNTERS = [
     "id": "pokemon-tower-3f",
     "name": "Pokemon Tower 3f",
     "xy": [
-      4200,
-      3480
+      5390,
+      3712
     ],
     "encounters": [
       {
@@ -1309,8 +1309,8 @@ window.ENCOUNTERS = [
     "id": "pokemon-tower-4f",
     "name": "Pokemon Tower 4f",
     "xy": [
-      4200,
-      3480
+      5390,
+      3712
     ],
     "encounters": [
       {
@@ -1331,8 +1331,8 @@ window.ENCOUNTERS = [
     "id": "pokemon-tower-5f",
     "name": "Pokemon Tower 5f",
     "xy": [
-      4200,
-      3480
+      5390,
+      3712
     ],
     "encounters": [
       {
@@ -1353,8 +1353,8 @@ window.ENCOUNTERS = [
     "id": "pokemon-tower-6f",
     "name": "Pokemon Tower 6f",
     "xy": [
-      4200,
-      3480
+      5390,
+      3712
     ],
     "encounters": [
       {
@@ -1375,8 +1375,8 @@ window.ENCOUNTERS = [
     "id": "pokemon-tower-7f",
     "name": "Pokemon Tower 7f",
     "xy": [
-      4200,
-      3480
+      5390,
+      3712
     ],
     "encounters": [
       {
@@ -1397,8 +1397,8 @@ window.ENCOUNTERS = [
     "id": "power-plant-area",
     "name": "Power Plant",
     "xy": [
-      5100,
-      2880
+      6545,
+      3072
     ],
     "encounters": [
       {
@@ -1427,8 +1427,8 @@ window.ENCOUNTERS = [
     "id": "rock-tunnel-b1f",
     "name": "Rock Tunnel B1f",
     "xy": [
-      4920,
-      2880
+      6314,
+      3072
     ],
     "encounters": [
       {
@@ -1453,8 +1453,8 @@ window.ENCOUNTERS = [
     "id": "rock-tunnel-b2f",
     "name": "Rock Tunnel B2f",
     "xy": [
-      4920,
-      2880
+      6314,
+      3072
     ],
     "encounters": [
       {
@@ -1479,8 +1479,8 @@ window.ENCOUNTERS = [
     "id": "seafoam-islands-1f",
     "name": "Seafoam Islands 1f",
     "xy": [
-      2880,
-      4560
+      3696,
+      4864
     ],
     "encounters": [
       {
@@ -1521,8 +1521,8 @@ window.ENCOUNTERS = [
     "id": "seafoam-islands-b1f",
     "name": "Seafoam Islands B1f",
     "xy": [
-      2880,
-      4560
+      3696,
+      4864
     ],
     "encounters": [
       {
@@ -1559,8 +1559,8 @@ window.ENCOUNTERS = [
     "id": "seafoam-islands-b2f",
     "name": "Seafoam Islands B2f",
     "xy": [
-      2880,
-      4560
+      3696,
+      4864
     ],
     "encounters": [
       {
@@ -1597,8 +1597,8 @@ window.ENCOUNTERS = [
     "id": "seafoam-islands-b3f",
     "name": "Seafoam Islands B3f",
     "xy": [
-      2880,
-      4560
+      3696,
+      4864
     ],
     "encounters": [
       {
@@ -1631,8 +1631,8 @@ window.ENCOUNTERS = [
     "id": "seafoam-islands-b4f",
     "name": "Seafoam Islands B4f",
     "xy": [
-      2880,
-      4560
+      3696,
+      4864
     ],
     "encounters": [
       {
@@ -1665,8 +1665,8 @@ window.ENCOUNTERS = [
     "id": "viridian-forest-area",
     "name": "Viridian Forest",
     "xy": [
-      3360,
-      3900
+      4312,
+      4160
     ],
     "encounters": [
       {

@@ -4,6 +4,15 @@ An interactive map showing Pokémon encounter locations from Generation 1 (Red v
 
 ## Quick Start
 
+### Prerequisites
+
+You'll need the high-resolution map image:
+- **full_kanto_map.png** (7700x6400 pixels) - Not included in the repository due to file size
+- Place it in the root directory of this project
+- Alternative: Use `map.png` (1080x1053) by updating `index.html` and `coordinate_helper.html`
+
+### Running the Application
+
 To run index.html on localhost, run terminal:
 ```bash
 python3 -m http.server 8000

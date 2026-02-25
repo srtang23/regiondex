@@ -153,9 +153,9 @@
 
     <script>
       // --- 1) Configure your image map ---
-      // Using map.gif (6000x6000) for high quality zooming
-      const IMAGE_WIDTH = 6000;
-      const IMAGE_HEIGHT = 6000;
+      // Using full_kanto_map.png (7700x6400) for high quality zooming
+      const IMAGE_WIDTH = 7700;
+      const IMAGE_HEIGHT = 6400;
 
       // Leaflet uses [y, x] for "LatLng"-like pairs in CRS.Simple.
       // We'll store data as [x, y], then convert with toLatLng().
@@ -177,7 +177,7 @@
       });
 
       // Your Kanto map image with optimized rendering
-      L.imageOverlay("./map.gif", bounds, {
+      L.imageOverlay("./full_kanto_map.png", bounds, {
         opacity: 1,
         className: 'high-quality-map',
       }).addTo(map);

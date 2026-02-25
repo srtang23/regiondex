@@ -51,11 +51,11 @@ encounters.forEach(encounter => {
   }
 });
 
-// Kanto map coordinate mapping (approximate pixel coordinates on a 6000x6000 map)
+// Kanto map coordinate mapping (approximate pixel coordinates on a 7700x6400 map)
 // This is a manual mapping based on the Kanto region layout
-// Coordinates scaled from 1000x1000 to 6000x6000 for actual image dimensions (map.gif)
-const SCALE_X = 6.0;
-const SCALE_Y = 6.0;
+// Coordinates scaled from 1000x1000 to 7700x6400 for actual image dimensions (full_kanto_map.png)
+const SCALE_X = 7.7;
+const SCALE_Y = 6.4;
 
 const locationCoordinatesBase = {
   // Routes
