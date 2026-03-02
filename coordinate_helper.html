@@ -66,6 +66,207 @@
         className: 'high-quality-image'
       }).addTo(map);
 
+      // Function to create interactive location areas
+      function createLocationArea(config) {
+        const {
+          id,
+          bounds,
+          label,
+          borderColor = '#FFBD1D',
+          fillColor = '#F4D995',
+          borderWeight = 5,
+          labelOffset = 50,
+          labelPosition = 'right',
+          labelFontSize = 16,
+          zoomLevel = 4
+        } = config;
+
+        let isSelected = false;
+
+        // Create rectangle
+        const rectangle = L.rectangle(bounds, {
+          color: borderColor,
+          weight: 0,  // Hidden by default
+          fillColor: fillColor,
+          fillOpacity: 0,  // Hidden by default
+          dashArray: '10, 5',
+          className: 'location-area-highlight'
+        }).addTo(map);
+
+        // Show highlight on hover
+        rectangle.on('mouseover', function() {
+          this.setStyle({
+            fillOpacity: 0.3,
+            weight: borderWeight
+          });
+        });
+
+        // Hide highlight when not hovering
+        rectangle.on('mouseout', function() {
+          if (isSelected) {
+            // If selected, show only border (no fill)
+            this.setStyle({
+              fillOpacity: 0,
+              weight: borderWeight
+            });
+          } else {
+            // If not selected, hide everything
+            this.setStyle({
+              fillOpacity: 0,
+              weight: 0
+            });
+          }
+        });
+
+        // Toggle selection on click
+        rectangle.on('click', function() {
+          if (!isSelected) {
+            // Select: show only border, zoom in
+            isSelected = true;
+            this.setStyle({
+              fillOpacity: 0,
+              weight: borderWeight
+            });
+            map.flyToBounds(bounds, {
+              padding: [50, 50],
+              maxZoom: zoomLevel,
+              duration: 1
+            });
+          } else {
+            // Deselect: hide everything, zoom out to full map
+            isSelected = false;
+            this.setStyle({
+              fillOpacity: 0,
+              weight: 0
+            });
+            map.flyToBounds([[0, 0], [IMAGE_HEIGHT, IMAGE_WIDTH]], {
+              padding: [0, 0],
+              maxZoom: 1,
+              duration: 1
+            });
+          }
+        });
+
+        // Calculate label position
+        const centerY = (bounds[0][0] + bounds[1][0]) / 2;
+        const centerX = (bounds[0][1] + bounds[1][1]) / 2;
+        let labelLat, labelLng;
+
+        if (labelPosition === 'right') {
+          labelLat = centerY;
+          labelLng = bounds[1][1] + labelOffset;
+        } else if (labelPosition === 'left') {
+          labelLat = centerY;
+          labelLng = bounds[0][1] - labelOffset;
+        } else if (labelPosition === 'top') {
+          labelLat = bounds[0][0] - labelOffset;
+          labelLng = centerX;
+        } else if (labelPosition === 'bottom') {
+          labelLat = bounds[1][0] + labelOffset;
+          labelLng = centerX;
+        }
+
+        // Add label
+        const areaLabel = L.marker([labelLat, labelLng], {
+          icon: L.divIcon({
+            className: 'area-label',
+            html: `<div style="font-weight: bold; font-size: ${labelFontSize}px; color: #000000; white-space: nowrap; cursor: pointer;">${label}</div>`,
+            iconSize: [100, 28],
+            iconAnchor: [0, 14]
+          })
+        }).addTo(map);
+
+        // Make label also trigger hover and click
+        areaLabel.on('mouseover', function() {
+          rectangle.setStyle({
+            fillOpacity: 0.3,
+            weight: borderWeight
+          });
+        });
+
+        areaLabel.on('mouseout', function() {
+          if (isSelected) {
+            // If selected, show only border (no fill)
+            rectangle.setStyle({
+              fillOpacity: 0,
+              weight: borderWeight
+            });
+          } else {
+            // If not selected, hide everything
+            rectangle.setStyle({
+              fillOpacity: 0,
+              weight: 0
+            });
+          }
+        });
+
+        areaLabel.on('click', function() {
+          if (!isSelected) {
+            // Select: show only border, zoom in
+            isSelected = true;
+            rectangle.setStyle({
+              fillOpacity: 0,
+              weight: borderWeight
+            });
+            map.flyToBounds(bounds, {
+              padding: [50, 50],
+              maxZoom: zoomLevel,
+              duration: 1
+            });
+          } else {
+            // Deselect: hide everything, zoom out to full map
+            isSelected = false;
+            rectangle.setStyle({
+              fillOpacity: 0,
+              weight: 0
+            });
+            map.flyToBounds([[0, 0], [IMAGE_HEIGHT, IMAGE_WIDTH]], {
+              padding: [0, 0],
+              maxZoom: 1,
+              duration: 1
+            });
+          }
+        });
+
+        return { rectangle, label: areaLabel };
+      }
+
+      // Define location areas
+      // To add more areas, add objects to this array with the following properties:
+      // - id: unique identifier (e.g., 'kanto-route-2-area')
+      // - bounds: [[topLeftY, topLeftX], [bottomRightY, bottomRightX]]
+      // - label: display name (e.g., 'Route 2')
+      // - labelPosition: 'right', 'left', 'top', or 'bottom' (optional, default: 'right')
+      // - labelOffset: distance from area in pixels (optional, default: 50)
+      // - labelFontSize: font size in pixels (optional, default: 16)
+      // - borderColor: hex color for border (optional, default: '#FFBD1D')
+      // - fillColor: hex color for fill (optional, default: '#F4D995')
+      // - borderWeight: thickness of border (optional, default: 5)
+      // - zoomLevel: zoom level when clicked (optional, default: 4)
+      const locationAreas = [
+        {
+          id: 'kanto-route-1-area',
+          bounds: [[2240, 960], [2880, 1340]],
+          label: 'Route 1',
+          labelPosition: 'right',
+          labelOffset: 50,
+          labelFontSize: 16,
+          zoomLevel: 4
+        }
+        // Example of adding another area:
+        // {
+        //   id: 'kanto-route-2-area',
+        //   bounds: [[1500, 800], [2000, 1200]],
+        //   label: 'Route 2',
+        //   labelPosition: 'left',
+        //   borderColor: '#FF5733',
+        //   fillColor: '#FFC300'
+        // }
+      ];
+
+      // Create all location areas
+      locationAreas.forEach(area => createLocationArea(area));
+
       // Fit the entire image in the viewport
       map.fitBounds(bounds, {
         padding: [0, 0],
