@@ -9,7 +9,6 @@ An interactive map showing Pokémon encounter locations from Generation 1 (Red v
 You'll need the high-resolution map image:
 - **full_kanto_map.png** (7700x6400 pixels) - Not included in the repository due to file size
 - Place it in the root directory of this project
-- Alternative: Use `map.png` (1080x1053) by updating `index.html` and `coordinate_helper.html`
 
 ### Running the Application
 
@@ -22,17 +21,8 @@ Then open http://localhost:8000 in your browser.
 
 ## Features
 
-- **Interactive Map**: Click on location markers to see detailed encounter information
+- **Interactive Map**: Click on location areas to see detailed encounter information
 - **Pokémon Filter**: Select a specific Pokémon to see all locations where it can be found
-- **Color-Coded Locations**: Different location types are color-coded for easy identification:
-  - 🟢 Green: Routes
-  - 🟤 Brown: Caves/Tunnels
-  - 🟣 Purple: Towers
-  - 🟠 Orange: Safari Zone
-  - 🔵 Blue: Water Areas
-  - 🌲 Dark Green: Forests
-  - 🔴 Red: Buildings (Mansion, Power Plant)
-  - 🟡 Yellow: Victory Road
 
 ## Files
 
