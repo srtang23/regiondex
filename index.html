@@ -30,39 +30,6 @@
       }
       .muted { color: #666; font-size: 13px; }
 
-      #legend {
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
-        background: white;
-        padding: 12px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        z-index: 1000;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        font-size: 12px;
-      }
-
-      #legend h4 {
-        margin: 0 0 8px 0;
-        font-size: 13px;
-        font-weight: 600;
-      }
-
-      .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 4px;
-      }
-
-      .legend-color {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        border: 2px solid;
-      }
-
       /* High-quality image rendering - prevent blur on zoom */
       .high-quality-map {
         image-rendering: -webkit-optimize-contrast;
@@ -92,6 +59,21 @@
       .leaflet-zoom-animated {
         will-change: transform;
       }
+
+      /* Smooth transitions for location area highlights */
+      .location-area-highlight {
+        transition: fill-opacity 0.15s ease-out, stroke-width 0.15s ease-out, stroke-opacity 0.15s ease-out;
+      }
+
+      /* Make text labels non-interactive - allow mouse events to pass through */
+      .area-label {
+        pointer-events: none !important;
+      }
+
+      /* But make interactive labels (like Safari Zone main label) clickable */
+      .area-label-interactive {
+        pointer-events: auto !important;
+      }
     </style>
   </head>
 
@@ -104,51 +86,9 @@
         </div>
 
         <div class="muted" id="summary"></div>
-
-        <div style="margin-left: auto;">
-          <button id="toggleLegend" style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">
-            Toggle Legend
-          </button>
-        </div>
       </div>
 
-      <div id="map">
-        <div id="legend">
-          <h4>Location Types</h4>
-          <div class="legend-item">
-            <div class="legend-color" style="background: #44dd66; border-color: #22aa44;"></div>
-            <span>Routes</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: #aa7744; border-color: #885522;"></div>
-            <span>Caves/Tunnels</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: #aa66dd; border-color: #8844aa;"></div>
-            <span>Towers</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: #ffaa22; border-color: #dd8800;"></div>
-            <span>Safari Zone</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: #4488dd; border-color: #2266aa;"></div>
-            <span>Water Areas</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: #44aa66; border-color: #228844;"></div>
-            <span>Forests</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: #dd4466; border-color: #aa2244;"></div>
-            <span>Buildings</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: #ddaa44; border-color: #aa8822;"></div>
-            <span>Victory Road</span>
-          </div>
-        </div>
-      </div>
+      <div id="map"></div>
     </div>
 
     <script>
@@ -171,8 +111,8 @@
         minZoom: -3,  // Allow zooming out more to see full image
         maxZoom: 5,  // Increased max zoom for better detail
         zoomControl: true,
-        zoomSnap: 0.25,  // Smoother zoom increments
-        zoomDelta: 0.5,  // Smoother zoom steps
+        zoomSnap: 0.5,  // Larger zoom increments for easier manual zooming
+        zoomDelta: 1,  // Larger zoom steps (double click, scroll wheel)
         preferCanvas: true,  // Use canvas renderer for better performance
       });
 
@@ -181,6 +121,12 @@
         opacity: 1,
         className: 'high-quality-map',
       }).addTo(map);
+
+      // Track currently selected area globally
+      let currentlySelectedArea = null;
+      let groupedAreas = {}; // Track areas by group
+      let allAreas = {}; // Track all rectangles by ID
+      let allLabels = {}; // Track all labels by ID
 
       // Function to create interactive location areas
       function createLocationArea(config) {
@@ -191,15 +137,75 @@
           borderColor = '#FFBD1D',
           fillColor = '#F4D995',
           borderWeight = 4,
-          labelOffset = 40,
+          labelOffset = 30,
+          labelOffsetX = 0,
+          labelOffsetY = 0,
           labelPosition = 'right',
-          zoomLevel = 3
+          labelFontSize,
+          isStaticLabel = false,
+          zoomLevel = 3,
+          group
         } = config;
+
+        // If this is a static label (like Safari Zone), create only a non-interactive label
+        if (isStaticLabel) {
+          const centerX = (bounds[0][0] + bounds[1][0]) / 2;
+          const centerY = (bounds[0][1] + bounds[1][1]) / 2;
+          const customOffsetX = config.labelOffsetX || 0;
+          const customOffsetY = config.labelOffsetY || 0;
+
+          let labelLng, labelLat;
+          if (labelPosition === 'bottom') {
+            labelLng = centerX + customOffsetX;
+            labelLat = bounds[0][1] - labelOffset + customOffsetY;
+          } else if (labelPosition === 'top') {
+            labelLng = centerX + customOffsetX;
+            labelLat = bounds[1][1] + labelOffset + customOffsetY;
+          } else {
+            labelLng = centerX + customOffsetX;
+            labelLat = centerY + customOffsetY;
+          }
+
+          const staticLabelDiv = document.createElement('div');
+          staticLabelDiv.style.cssText = `
+            font-weight: bold;
+            font-size: 16px;
+            color: #000000;
+            white-space: nowrap;
+            cursor: default;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            pointer-events: none;
+          `;
+          staticLabelDiv.textContent = label;
+
+          const staticLabel = L.marker([labelLat, labelLng], {
+            icon: L.divIcon({
+              className: 'area-label',
+              html: staticLabelDiv.outerHTML,
+              iconSize: [300, 60],
+              iconAnchor: [150, 30]
+            })
+          }).addTo(map);
+
+          return { label: staticLabel };
+        }
 
         let isSelected = false;
 
+        // Convert bounds from [X, Y] format to Leaflet's [Y, X] format
+        // bounds input: [[minX, minY], [maxX, maxY]]
+        // Leaflet needs: [[minY, minX], [maxY, maxX]]
+        const leafletBounds = [
+          [bounds[0][1], bounds[0][0]],  // [minY, minX]
+          [bounds[1][1], bounds[1][0]]   // [maxY, maxX]
+        ];
+
         // Create rectangle
-        const rectangle = L.rectangle(bounds, {
+        const rectangle = L.rectangle(leafletBounds, {
           color: borderColor,
           weight: 0,  // Hidden by default
           fillColor: fillColor,
@@ -214,6 +220,7 @@
             fillOpacity: 0.3,
             weight: borderWeight
           });
+          updateLabelStyle(true, isSelected);
         });
 
         // Hide highlight when not hovering
@@ -224,25 +231,46 @@
               fillOpacity: 0,
               weight: borderWeight
             });
+            updateLabelStyle(false, true);
           } else {
             // If not selected, hide everything
             this.setStyle({
               fillOpacity: 0,
               weight: 0
             });
+            updateLabelStyle(false, false);
           }
         });
 
         // Toggle selection on click
         rectangle.on('click', function() {
           if (!isSelected) {
+            // Deselect previously selected area if any
+            if (currentlySelectedArea && currentlySelectedArea !== rectangle) {
+              currentlySelectedArea.deselect();
+            }
+
             // Select: show only border, zoom in
             isSelected = true;
-            this.setStyle({
-              fillOpacity: 0,
-              weight: borderWeight
-            });
-            map.flyToBounds(bounds, {
+            currentlySelectedArea = rectangle;
+
+            // If part of a group, select all areas in the group
+            if (group && groupedAreas[group]) {
+              groupedAreas[group].forEach(rect => {
+                rect.setStyle({
+                  fillOpacity: 0,
+                  weight: borderWeight
+                });
+              });
+            } else {
+              this.setStyle({
+                fillOpacity: 0,
+                weight: borderWeight
+              });
+            }
+
+            updateLabelStyle(false, true);
+            map.flyToBounds(leafletBounds, {
               padding: [50, 50],
               maxZoom: zoomLevel,
               duration: 1
@@ -250,10 +278,24 @@
           } else {
             // Deselect: hide everything, zoom out to full map
             isSelected = false;
-            this.setStyle({
-              fillOpacity: 0,
-              weight: 0
-            });
+            currentlySelectedArea = null;
+
+            // If part of a group, deselect all areas in the group
+            if (group && groupedAreas[group]) {
+              groupedAreas[group].forEach(rect => {
+                rect.setStyle({
+                  fillOpacity: 0,
+                  weight: 0
+                });
+              });
+            } else {
+              this.setStyle({
+                fillOpacity: 0,
+                weight: 0
+              });
+            }
+
+            updateLabelStyle(false, false);
             map.flyToBounds([[0, 0], [IMAGE_HEIGHT, IMAGE_WIDTH]], {
               padding: [0, 0],
               maxZoom: 1,
@@ -263,85 +305,167 @@
         });
 
         // Calculate label position
-        const centerY = (bounds[0][0] + bounds[1][0]) / 2;
-        const centerX = (bounds[0][1] + bounds[1][1]) / 2;
-        let labelLat, labelLng;
+        // bounds format: [[minX, minY], [maxX, maxY]]
+        // where minX=left, maxX=right, minY=bottom, maxY=top
+        const centerX = (bounds[0][0] + bounds[1][0]) / 2;
+        const centerY = (bounds[0][1] + bounds[1][1]) / 2;
+        let labelLng, labelLat;  // Leaflet uses [lat, lng] which is [Y, X]
 
+        // Get custom offsets if provided
+        const customOffsetX = config.labelOffsetX || 0;
+        const customOffsetY = config.labelOffsetY || 0;
+
+        // Position labels on the specified side, centered along that edge
+        // Note: In your coordinate system, larger Y = higher on screen (top), smaller Y = lower on screen (bottom)
         if (labelPosition === 'right') {
-          labelLat = centerY;
-          labelLng = bounds[1][1] + labelOffset;
+          labelLng = bounds[1][0] + labelOffset + customOffsetX;  // maxX + offset (move right)
+          labelLat = centerY + customOffsetY;
         } else if (labelPosition === 'left') {
-          labelLat = centerY;
-          labelLng = bounds[0][1] - labelOffset;
+          labelLng = bounds[0][0] - labelOffset + customOffsetX;  // minX - offset (move left)
+          labelLat = centerY + customOffsetY;
         } else if (labelPosition === 'top') {
-          labelLat = bounds[0][0] - labelOffset;
-          labelLng = centerX;
+          // Top = higher Y value, so ADD offset to move label higher
+          labelLng = centerX + customOffsetX;
+          labelLat = bounds[1][1] + labelOffset + customOffsetY;  // maxY + offset (move up)
         } else if (labelPosition === 'bottom') {
-          labelLat = bounds[1][0] + labelOffset;
-          labelLng = centerX;
+          // Bottom = lower Y value, so SUBTRACT offset to move label lower
+          labelLng = centerX + customOffsetX;
+          labelLat = bounds[0][1] - labelOffset + customOffsetY;  // minY - offset (move down)
+        } else if (labelPosition === 'center') {
+          // Center the label in the middle of the area
+          labelLng = centerX + customOffsetX;
+          labelLat = centerY + customOffsetY;
+        } else {
+          // Default to right if no position specified
+          labelLng = bounds[1][0] + labelOffset + customOffsetX;
+          labelLat = centerY + customOffsetY;
         }
 
-        // Add label
+        // Add label with dynamic sizing
+        const baseFontSize = labelFontSize || 16;  // Use custom font size or default
+
+        const labelDiv = document.createElement('div');
+        labelDiv.style.cssText = `
+          font-weight: bold;
+          font-size: ${baseFontSize}px;
+          color: #000000;
+          white-space: nowrap;
+          cursor: default;
+          transition: color 0.15s ease-out;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          pointer-events: none;
+        `;
+        labelDiv.textContent = label;
+
+        // Function to calculate anchor based on zoom and text width
+        function calculateAnchor(zoom) {
+          const fontSize = baseFontSize * Math.pow(1.4, zoom - 1);
+          // Estimate text width: roughly 0.7 * fontSize per character (bold text is wider)
+          const estimatedTextWidth = label.length * fontSize * 0.7;
+
+          let anchorX;
+          let anchorY = 30;  // Y is always centered (for left/right positions)
+
+          if (labelPosition === 'left') {
+            // Coordinate is LEFT of the area (at minX - offset), text should extend LEFT from coordinate
+            // Anchor at the right edge based on estimated text width
+            anchorX = 170 + estimatedTextWidth;  // Anchor at text width + padding, cap at iconSize
+          } else if (labelPosition === 'right') {
+            // Coordinate is RIGHT of the area (at maxX + offset), text should extend RIGHT from coordinate
+            // So anchor at LEFT edge of text, text extends right
+            anchorX = 110;  // Anchor at right edge
+          } else if (labelPosition === 'top') {
+            anchorX = 150;  // Center horizontally
+            anchorY = 40;   // Anchor at top
+          } else if (labelPosition === 'center') {
+            anchorX = 150;  // Center horizontally
+            anchorY = 30;   // Center vertically
+          } else {  // bottom
+            anchorX = 150;  // Center horizontally
+            anchorY = 20;    // Anchor at bottom
+          }
+
+          return [anchorX, anchorY];
+        }
+
+        // Calculate initial anchor
+        const initialAnchor = calculateAnchor(map.getZoom());
+
+        // Create marker with calculated initial anchor
         const areaLabel = L.marker([labelLat, labelLng], {
           icon: L.divIcon({
             className: 'area-label',
-            html: `<div style="font-weight: bold; font-size: 14px; color: #000000; white-space: nowrap; cursor: pointer;">${label}</div>`,
-            iconSize: [100, 25],
-            iconAnchor: [0, 12.5]
+            html: labelDiv.outerHTML,
+            iconSize: [300, 60],
+            iconAnchor: initialAnchor
           })
         }).addTo(map);
 
-        // Make label also trigger hover and click
-        areaLabel.on('mouseover', function() {
-          rectangle.setStyle({
-            fillOpacity: 0.3,
-            weight: borderWeight
+        // Function to update label font size and anchor based on zoom
+        function updateLabelSize() {
+          const labelElement = areaLabel.getElement()?.querySelector('div');
+          if (labelElement) {
+            const zoom = map.getZoom();
+            const fontSize = baseFontSize * Math.pow(1.4, zoom - 1);
+            labelElement.style.fontSize = `${fontSize}px`;
+
+            // Update the icon anchor
+            const newAnchor = calculateAnchor(zoom);
+            const icon = areaLabel.getIcon();
+            icon.options.iconAnchor = newAnchor;
+            areaLabel.setIcon(icon);
+
+            // Reapply color after setIcon (which recreates the element)
+            updateLabelStyle(false, isSelected);
+          }
+        }
+
+        // Function to update label style (color only)
+        function updateLabelStyle(isHovering, isAreaSelected) {
+          const labelElement = areaLabel.getElement()?.querySelector('div');
+          if (labelElement) {
+            if (isHovering) {
+              labelElement.style.color = '#FFBD1D';
+            } else if (isAreaSelected) {
+              labelElement.style.color = '#FFBD1D';
+            } else {
+              labelElement.style.color = '#000000';
+            }
+            // Don't modify font size here - it's handled by updateLabelSize
+          }
+        }
+
+        // Update size on zoom
+        map.on('zoomend', updateLabelSize);
+
+        // Set initial size after a short delay to ensure element is rendered
+        setTimeout(updateLabelSize, 100);
+
+        // Add deselect method to rectangle
+        rectangle.deselect = function() {
+          isSelected = false;
+          this.setStyle({
+            fillOpacity: 0,
+            weight: 0
           });
-        });
+          updateLabelStyle(false, false);
+        };
 
-        areaLabel.on('mouseout', function() {
-          if (isSelected) {
-            // If selected, show only border (no fill)
-            rectangle.setStyle({
-              fillOpacity: 0,
-              weight: borderWeight
-            });
-          } else {
-            // If not selected, hide everything
-            rectangle.setStyle({
-              fillOpacity: 0,
-              weight: 0
-            });
+        // Track this area in its group if it has one
+        if (group) {
+          if (!groupedAreas[group]) {
+            groupedAreas[group] = [];
           }
-        });
+          groupedAreas[group].push(rectangle);
+        }
 
-        areaLabel.on('click', function() {
-          if (!isSelected) {
-            // Select: show only border, zoom in
-            isSelected = true;
-            rectangle.setStyle({
-              fillOpacity: 0,
-              weight: borderWeight
-            });
-            map.flyToBounds(bounds, {
-              padding: [50, 50],
-              maxZoom: zoomLevel,
-              duration: 1
-            });
-          } else {
-            // Deselect: hide everything, zoom out to full map
-            isSelected = false;
-            rectangle.setStyle({
-              fillOpacity: 0,
-              weight: 0
-            });
-            map.flyToBounds([[0, 0], [IMAGE_HEIGHT, IMAGE_WIDTH]], {
-              padding: [0, 0],
-              maxZoom: 1,
-              duration: 1
-            });
-          }
-        });
+        // Track this area by ID
+        allAreas[id] = rectangle;
+        allLabels[id] = areaLabel;
 
         return { rectangle, label: areaLabel };
       }
@@ -349,10 +473,12 @@
       // Define location areas
       // To add more areas, add objects to this array with the following properties:
       // - id: unique identifier (e.g., 'kanto-route-2-area')
-      // - bounds: [[topLeftY, topLeftX], [bottomRightY, bottomRightX]]
+      // - bounds: [[minX, minY], [maxX, maxY]]  // X, Y format for consistency
       // - label: display name (e.g., 'Route 2')
       // - labelPosition: 'right', 'left', 'top', or 'bottom' (optional, default: 'right')
-      // - labelOffset: distance from area in pixels (optional, default: 40)
+      // - labelOffset: distance from area in pixels (optional, default: 30)
+      // - labelOffsetX: additional X offset in pixels for fine-tuning (optional, default: 0)
+      // - labelOffsetY: additional Y offset in pixels for fine-tuning (optional, default: 0)
       // - borderColor: hex color for border (optional, default: '#FFBD1D')
       // - fillColor: hex color for fill (optional, default: '#F4D995')
       // - borderWeight: thickness of border (optional, default: 4)
@@ -360,21 +486,343 @@
       const locationAreas = [
         {
           id: 'kanto-route-1-area',
-          bounds: [[2240, 960], [2880, 1340]],
+          bounds: [[960, 2240], [1340, 2880]],  // [X, Y] format
           label: 'Route 1',
           labelPosition: 'right',
-          labelOffset: 40,
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-10-area',
+          bounds: [[6145, 4325], [6525, 5600]],
+          label: 'Route 10',
+          labelPosition: 'right',
+          labelOffsetY: 300,
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-11-area',
+          bounds: [[4990, 2720], [6145, 3040]],
+          label: 'Route 11',
+          labelPosition: 'top',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-12-area',
+          bounds: [[6145, 2080], [6525, 4000]],
+          label: 'Route 12',
+          labelPosition: 'right',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-13-area',
+          bounds: [[5375, 1760], [6525, 2080]],
+          label: 'Route 13',
+          labelPosition: 'right',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-14-area',
+          bounds: [[4990, 1120], [5375, 2080]],
+          label: 'Route 14',
+          labelPosition: 'right',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-15-area',
+          bounds: [[3840, 1120], [4990, 1440]],
+          label: 'Route 15',
+          labelPosition: 'bottom',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-16-area',
+          bounds: [[2115, 4000], [2880, 4320]],
+          label: 'Route 16',
+          labelPosition: 'top',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-17-area',
+          bounds: [[2115, 1440], [2495, 4000]],
+          label: 'Route 17',
+          labelPosition: 'right',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-18-area',
+          bounds: [[2115, 1120], [3070, 1440]],
+          label: 'Route 18',
+          labelPosition: 'bottom',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-2-south-towards-viridian-city',
+          bounds: [[960, 3520], [1340, 4800]],
+          label: 'Route 2',
+          labelPosition: 'right',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-22-area',
+          bounds: [[0, 2980], [770, 3360]],
+          label: 'Route 22',
+          labelPosition: 'left',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-23-area',
+          bounds: [[0, 3360], [380, 6240]],
+          label: 'Route 23',
+          labelPosition: 'left',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-24-area',
+          bounds: [[4420, 5760], [4800, 6400]],
+          label: 'Route 24',
+          labelPosition: 'top',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-25-area',
+          bounds: [[4800, 6080], [5950, 6400]],
+          label: 'Route 25',
+          labelPosition: 'bottom',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-5-area',
+          bounds: [[4220, 4480], [5000, 5280]],
+          label: 'Route 5',
+          labelPosition: 'left',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-6-area',
+          bounds: [[4420, 3200], [4800, 3840]],
+          label: 'Route 6',
+          labelPosition: 'right',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-7-area',
+          bounds: [[3840, 4000], [4220, 4320]],
+          label: 'Route 7',
+          labelPosition: 'top',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-8-area',
+          bounds: [[4930, 4000], [6140, 4320]],
+          label: 'Route 8',
+          labelPosition: 'top',
+          zoomLevel: 3
+        },
+        {
+          id: 'kanto-route-9-area',
+          bounds: [[5000, 5280], [6140, 5600]],
+          label: 'Route 9',
+          labelPosition: 'top',
+          zoomLevel: 3
+        },
+        // Safari Zone - East
+        {
+          id: 'kanto-safari-zone-area-1-east',
+          bounds: [[6730, 540], [7600, 1100]],
+          label: 'East',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Safari Zone - North
+        {
+          id: 'kanto-safari-zone-area-2-north',
+          bounds: [[5810, 900], [6720, 1540]],
+          label: 'North',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Safari Zone - West
+        {
+          id: 'kanto-safari-zone-area-3-west',
+          bounds: [[5040, 490], [5800, 1070]],
+          label: 'West',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Safari Zone - Center
+        {
+          id: 'kanto-safari-zone-center',
+          bounds: [[5860, 300], [6680, 880]],
+          label: 'Center',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Safari Zone - Main Label (static, non-interactive, just for display)
+        {
+          id: 'safari-zone-main-label',
+          bounds: [[5860, 300], [6680, 880]], // Use Center bounds for positioning
+          label: 'Safari Zone',
+          labelPosition: 'bottom',
+          labelOffsetY: -100,
+          isStaticLabel: true,
+          zoomLevel: 3
+        },
+        // Route 4
+        {
+          id: 'kanto-route-4-area',
+          bounds: [[3150, 5278], [4050, 5600]],
+          label: 'Route 4',
+          labelPosition: 'bottom',
+          zoomLevel: 3
+        },
+        // Viridian Forest
+        {
+          id: 'viridian-forest-area',
+          bounds: [[80, 1770], [940, 2860]],
+          label: 'Viridian Forest',
+          labelPosition: 'left',
+          zoomLevel: 3
+        },
+        // Route 21
+        {
+          id: 'kanto-sea-route-21-area',
+          bounds: [[960, 420], [1340, 1680]],
+          label: 'Route 21',
+          labelPosition: 'left',
+          zoomLevel: 3
+        },
+        // Power Plant
+        {
+          id: 'power-plant-area',
+          bounds: [[5330, 4525], [6095, 5145]],
+          label: 'Power Plant',
+          labelPosition: 'top',
+          zoomLevel: 3
+        },
+        // Victory Road - 1F
+        {
+          id: 'kanto-victory-road-2-1f',
+          bounds: [[400, 5660], [780, 6010]],
+          label: '1F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Victory Road - 2F
+        {
+          id: 'kanto-victory-road-2-2f',
+          bounds: [[790, 5840], [1610, 6210]],
+          label: '2F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Victory Road - 3F
+        {
+          id: 'kanto-victory-road-2-3f',
+          bounds: [[790, 5490], [1510, 5850]],
+          label: '3F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Victory Road - Main Label (static, non-interactive)
+        {
+          id: 'victory-road-main-label',
+          bounds: [[790, 5840], [1610, 6210]], // Use 2F bounds for positioning
+          label: 'Victory Road',
+          labelPosition: 'top',
+          labelOffsetY: 100,
+          isStaticLabel: true,
+          zoomLevel: 3
+        },
+        // Seafoam Islands - 1F
+        {
+          id: 'seafoam-islands-1f',
+          bounds: [[3660, 420], [4250, 780]],
+          label: '1F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Seafoam Islands - B1F
+        {
+          id: 'seafoam-islands-b1f',
+          bounds: [[4250, 420], [4860, 790]],
+          label: 'B1F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Seafoam Islands - B2F
+        {
+          id: 'seafoam-islands-b2f',
+          bounds: [[3660, 30], [4250, 400]],
+          label: 'B2F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Seafoam Islands - B3F
+        {
+          id: 'seafoam-islands-b3f',
+          bounds: [[4260, 20], [4890, 400]],
+          label: 'B3F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Seafoam Islands - B4F
+        {
+          id: 'seafoam-islands-b4f',
+          bounds: [[4880, 20], [5480, 390]],
+          label: 'B4F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Seafoam Islands - Main Label (static, non-interactive)
+        {
+          id: 'seafoam-islands-main-label',
+          bounds: [[4260, 20], [4890, 400]], // Use B3F bounds for positioning
+          label: 'Seafoam Islands',
+          labelPosition: 'bottom',
+          labelOffsetY: -100,
+          isStaticLabel: true,
+          zoomLevel: 3
+        },
+        // Rock Tunnel - B1F
+        {
+          id: 'rock-tunnel-b1f',
+          bounds: [[6040, 5620], [6800, 6250]],
+          label: 'B1F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Rock Tunnel - B2F
+        {
+          id: 'rock-tunnel-b2f',
+          bounds: [[6820, 5620], [7580, 6250]],
+          label: 'B2F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Rock Tunnel - Main Label (static, non-interactive)
+        {
+          id: 'rock-tunnel-main-label',
+          bounds: [[6420, 5620], [7200, 6250]], // Use B1F bounds for positioning
+          label: 'Rock Tunnel',
+          labelPosition: 'top',
+          labelOffsetY: 100,
+          isStaticLabel: true,
           zoomLevel: 3
         }
-        // Example of adding another area:
-        // {
-        //   id: 'kanto-route-2-area',
-        //   bounds: [[1500, 800], [2000, 1200]],
-        //   label: 'Route 2',
-        //   labelPosition: 'left',
-        //   borderColor: '#FF5733',
-        //   fillColor: '#FFC300'
-        // }
       ];
 
       // Create all location areas
@@ -422,119 +870,9 @@
 
       const summary = document.getElementById("summary");
 
-      // --- 3) Marker rendering + filtering ---
-      const markersLayer = L.layerGroup().addTo(map);
-
-      function popupHTML(location) {
-        // Sort encounters high -> low for nice display
-        const rows = [...location.encounters].sort((a, b) => b.rate - a.rate);
-        return `
-          <div style="min-width: 200px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;">
-            <div style="font-weight: 700; margin-bottom: 6px;">${location.name}</div>
-            <div style="font-size: 13px; color: #444; margin-bottom: 8px;">Wild encounters (sample)</div>
-            <div style="font-size: 13px;">
-              ${rows.map(r => `<div>${r.pokemon} — <b>${r.rate}%</b></div>`).join("")}
-            </div>
-          </div>
-        `;
-      }
-
-      function locationHasPokemon(location, pokemonName) {
-        if (pokemonName === "(All)") return true;
-        return location.encounters.some(e => e.pokemon === pokemonName);
-      }
-
-      function render(pokemonName) {
-        markersLayer.clearLayers();
-
-        const visible = window.ENCOUNTERS.filter(loc => locationHasPokemon(loc, pokemonName));
-
-        for (const loc of visible) {
-          // Color code by location type
-          let color = '#3388ff';
-          let fillColor = '#3388ff';
-
-          if (loc.name.includes('Route')) {
-            color = '#22aa44';
-            fillColor = '#44dd66';
-          } else if (loc.name.includes('Cave') || loc.name.includes('Tunnel')) {
-            color = '#885522';
-            fillColor = '#aa7744';
-          } else if (loc.name.includes('Tower')) {
-            color = '#8844aa';
-            fillColor = '#aa66dd';
-          } else if (loc.name.includes('Safari')) {
-            color = '#dd8800';
-            fillColor = '#ffaa22';
-          } else if (loc.name.includes('Seafoam') || loc.name.includes('Sea Route')) {
-            color = '#2266aa';
-            fillColor = '#4488dd';
-          } else if (loc.name.includes('Forest')) {
-            color = '#228844';
-            fillColor = '#44aa66';
-          } else if (loc.name.includes('Mansion') || loc.name.includes('Power Plant')) {
-            color = '#aa2244';
-            fillColor = '#dd4466';
-          } else if (loc.name.includes('Victory Road')) {
-            color = '#aa8822';
-            fillColor = '#ddaa44';
-          }
-
-          const marker = L.circleMarker(toLatLng(loc.xy), {
-            radius: 8,
-            weight: 2,
-            color: color,
-            fillColor: fillColor,
-            fillOpacity: 0.7,
-          });
-
-          marker.bindTooltip(loc.name, { direction: "top", offset: [0, -6] });
-          marker.bindPopup(popupHTML(loc));
-          marker.addTo(markersLayer);
-        }
-
-        summary.textContent =
-          pokemonName === "(All)"
-            ? `${visible.length} locations shown`
-            : `${visible.length} locations with ${pokemonName}`;
-      }
-
-      select.addEventListener("change", () => render(select.value));
-
-      // Toggle legend visibility
-      const toggleLegendBtn = document.getElementById("toggleLegend");
-      const legend = document.getElementById("legend");
-      let legendVisible = true;
-
-      toggleLegendBtn.addEventListener("click", () => {
-        legendVisible = !legendVisible;
-        legend.style.display = legendVisible ? "block" : "none";
-      });
-
-      // Initial render
-      render("(All)");
-
       // Log some statistics
       console.log(`Loaded ${window.ENCOUNTERS.length} locations`);
       console.log(`Total Pokémon species: ${allPokemon.size}`);
-
-      // Count location types
-      const locationTypes = {};
-      window.ENCOUNTERS.forEach(loc => {
-        let type = 'Other';
-        if (loc.name.includes('Route')) type = 'Route';
-        else if (loc.name.includes('Cave') || loc.name.includes('Tunnel')) type = 'Cave/Tunnel';
-        else if (loc.name.includes('Tower')) type = 'Tower';
-        else if (loc.name.includes('Safari')) type = 'Safari Zone';
-        else if (loc.name.includes('Seafoam') || loc.name.includes('Sea Route')) type = 'Water Area';
-        else if (loc.name.includes('Forest')) type = 'Forest';
-        else if (loc.name.includes('Mansion') || loc.name.includes('Power Plant')) type = 'Building';
-        else if (loc.name.includes('Victory Road')) type = 'Victory Road';
-
-        locationTypes[type] = (locationTypes[type] || 0) + 1;
-      });
-
-      console.log('Location breakdown:', locationTypes);
     </script>
   </body>
 </html>
