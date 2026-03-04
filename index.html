@@ -142,13 +142,16 @@
           labelOffsetY = 0,
           labelPosition = 'right',
           labelFontSize,
-          isStaticLabel = false,
+          isMainLabel = false,
+          mainAreaBounds = null,
+          mainAreaPolygon = null, // Custom polygon coordinates [[x1,y1], [x2,y2], ...]
+          subAreaIds = [],
           zoomLevel = 3,
           group
         } = config;
 
-        // If this is a static label (like Safari Zone), create only a non-interactive label
-        if (isStaticLabel) {
+        // If this is a main label (like "Safari Zone"), create clickable text that selects all sub-areas
+        if (isMainLabel) {
           const centerX = (bounds[0][0] + bounds[1][0]) / 2;
           const centerY = (bounds[0][1] + bounds[1][1]) / 2;
           const customOffsetX = config.labelOffsetX || 0;
@@ -161,37 +164,246 @@
           } else if (labelPosition === 'top') {
             labelLng = centerX + customOffsetX;
             labelLat = bounds[1][1] + labelOffset + customOffsetY;
+          } else if (labelPosition === 'right') {
+            labelLng = bounds[1][0] + labelOffset + customOffsetX;
+            labelLat = centerY + customOffsetY;
+          } else if (labelPosition === 'left') {
+            labelLng = bounds[0][0] - labelOffset + customOffsetX;
+            labelLat = centerY + customOffsetY;
           } else {
             labelLng = centerX + customOffsetX;
             labelLat = centerY + customOffsetY;
           }
 
-          const staticLabelDiv = document.createElement('div');
-          staticLabelDiv.style.cssText = `
+          let isSelected = false;
+
+          // Create the main area polygon (hidden by default)
+          let polygonCoords;
+          let leafletMainBounds;
+
+          if (mainAreaPolygon) {
+            // Use custom polygon coordinates
+            // Convert from [X, Y] format to Leaflet's [Y, X] format
+            polygonCoords = mainAreaPolygon.map(coord => [coord[1], coord[0]]);
+
+            // Calculate bounds from polygon for zoom
+            const allX = mainAreaPolygon.map(c => c[0]);
+            const allY = mainAreaPolygon.map(c => c[1]);
+            const minX = Math.min(...allX);
+            const maxX = Math.max(...allX);
+            const minY = Math.min(...allY);
+            const maxY = Math.max(...allY);
+            leafletMainBounds = [[minY, minX], [maxY, maxX]];
+          } else {
+            // Use rectangular bounds
+            // Convert bounds to polygon coordinates [minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY]
+            polygonCoords = [
+              [mainAreaBounds[0][1], mainAreaBounds[0][0]],  // bottom-left [minY, minX]
+              [mainAreaBounds[0][1], mainAreaBounds[1][0]],  // bottom-right [minY, maxX]
+              [mainAreaBounds[1][1], mainAreaBounds[1][0]],  // top-right [maxY, maxX]
+              [mainAreaBounds[1][1], mainAreaBounds[0][0]]   // top-left [maxY, minX]
+            ];
+            leafletMainBounds = [
+              [mainAreaBounds[0][1], mainAreaBounds[0][0]],  // [minY, minX]
+              [mainAreaBounds[1][1], mainAreaBounds[1][0]]   // [maxY, maxX]
+            ];
+          }
+
+          const mainPolygon = L.polygon(polygonCoords, {
+            color: borderColor,
+            weight: 0,
+            fillColor: fillColor,
+            fillOpacity: 0,
+            dashArray: '10, 5',
+            className: 'location-area-highlight',
+            interactive: false // Don't block clicks to sub-areas
+          }).addTo(map);
+
+          const mainBaseFontSize = 16;
+
+          const mainLabelDiv = document.createElement('div');
+          mainLabelDiv.style.cssText = `
             font-weight: bold;
-            font-size: 16px;
+            font-size: ${mainBaseFontSize}px;
             color: #000000;
             white-space: nowrap;
-            cursor: default;
+            cursor: pointer;
             text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100%;
-            pointer-events: none;
+            pointer-events: auto;
+            transition: color 0.15s ease-out;
           `;
-          staticLabelDiv.textContent = label;
+          mainLabelDiv.textContent = label;
 
-          const staticLabel = L.marker([labelLat, labelLng], {
+          const mainLabel = L.marker([labelLat, labelLng], {
             icon: L.divIcon({
-              className: 'area-label',
-              html: staticLabelDiv.outerHTML,
+              className: 'area-label area-label-interactive',
+              html: mainLabelDiv.outerHTML,
               iconSize: [300, 60],
               iconAnchor: [150, 30]
             })
           }).addTo(map);
 
-          return { label: staticLabel };
+          // Function to update main label size dynamically
+          function updateMainLabelSize() {
+            const zoom = map.getZoom();
+            const fontSize = mainBaseFontSize * Math.pow(1.2, zoom + 3);
+            const estimatedTextWidth = label.length * fontSize * 0.7;
+
+            const newMainLabelDiv = document.createElement('div');
+            newMainLabelDiv.style.cssText = `
+              font-weight: bold;
+              font-size: ${fontSize}px;
+              color: #000000;
+              white-space: nowrap;
+              cursor: pointer;
+              text-align: center;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              height: 100%;
+              pointer-events: auto;
+              transition: color 0.15s ease-out;
+            `;
+            newMainLabelDiv.textContent = label;
+
+            // Calculate anchor based on label position
+            let anchorX, anchorY;
+            if (labelPosition === 'right') {
+              anchorX = 80;  // Anchor at left edge
+              anchorY = 30;
+            } else if (labelPosition === 'left') {
+              anchorX = 130 + (estimatedTextWidth / 2);
+              anchorY = 30;
+            } else if (labelPosition === 'top') {
+              anchorX = 150;
+              anchorY = 40;
+            } else if (labelPosition === 'bottom') {
+              anchorX = 150;
+              anchorY = 20;
+            } else {
+              anchorX = 150;
+              anchorY = 30;
+            }
+
+            const newIcon = L.divIcon({
+              className: 'area-label area-label-interactive',
+              html: newMainLabelDiv.outerHTML,
+              iconSize: [300, 60],
+              iconAnchor: [anchorX, anchorY]
+            });
+            mainLabel.setIcon(newIcon);
+
+            // Reapply color after setIcon
+            const labelElement = mainLabel.getElement()?.querySelector('div');
+            if (labelElement && isSelected) {
+              labelElement.style.color = '#FFBD1D';
+            }
+          }
+
+          // Update size on zoom
+          map.on('zoom', updateMainLabelSize);
+          map.on('zoomend', updateMainLabelSize);
+          setTimeout(updateMainLabelSize, 100);
+
+          // Hover handler for main label
+          mainLabel.on('mouseover', function() {
+            if (!isSelected) {
+              mainPolygon.setStyle({
+                fillOpacity: 0.3,
+                weight: borderWeight
+              });
+            }
+            const labelElement = mainLabel.getElement()?.querySelector('div');
+            if (labelElement) {
+              labelElement.style.color = '#FFBD1D';
+            }
+          });
+
+          mainLabel.on('mouseout', function() {
+            if (!isSelected) {
+              mainPolygon.setStyle({
+                fillOpacity: 0,
+                weight: 0
+              });
+            }
+            const labelElement = mainLabel.getElement()?.querySelector('div');
+            if (labelElement && !isSelected) {
+              labelElement.style.color = '#000000';
+            }
+          });
+
+          // Click handler for main label
+          mainLabel.on('click', function() {
+            if (!isSelected) {
+              // Deselect previously selected area if any
+              if (currentlySelectedArea) {
+                currentlySelectedArea.deselect();
+              }
+
+              // Select: show main polygon border
+              isSelected = true;
+              currentlySelectedArea = mainPolygon;
+
+              mainPolygon.setStyle({
+                fillOpacity: 0,
+                weight: borderWeight
+              });
+
+              // Update label color
+              const labelElement = mainLabel.getElement()?.querySelector('div');
+              if (labelElement) {
+                labelElement.style.color = '#FFBD1D';
+              }
+
+              // Zoom to main area
+              map.flyToBounds(leafletMainBounds, {
+                padding: [50, 50],
+                maxZoom: zoomLevel,
+                duration: 1
+              });
+            } else {
+              // Deselect: hide main polygon
+              isSelected = false;
+              currentlySelectedArea = null;
+
+              mainPolygon.setStyle({
+                fillOpacity: 0,
+                weight: 0
+              });
+
+              // Update label color
+              const labelElement = mainLabel.getElement()?.querySelector('div');
+              if (labelElement) {
+                labelElement.style.color = '#000000';
+              }
+
+              // Zoom out to full map
+              map.flyToBounds([[0, 0], [IMAGE_HEIGHT, IMAGE_WIDTH]], {
+                padding: [0, 0],
+                maxZoom: 1,
+                duration: 1
+              });
+            }
+          });
+
+          // Add deselect method to main polygon
+          mainPolygon.deselect = function() {
+            isSelected = false;
+            this.setStyle({
+              fillOpacity: 0,
+              weight: 0
+            });
+            const labelElement = mainLabel.getElement()?.querySelector('div');
+            if (labelElement) {
+              labelElement.style.color = '#000000';
+            }
+          };
+
+          return { rectangle: mainPolygon, label: mainLabel };
         }
 
         let isSelected = false;
@@ -363,7 +575,8 @@
 
         // Function to calculate anchor based on zoom and text width
         function calculateAnchor(zoom) {
-          const fontSize = baseFontSize * Math.pow(1.4, zoom - 1);
+          // Adjust zoom so that zoom -3 (initial view) = scale 1
+          const fontSize = baseFontSize * Math.pow(1.2, zoom + 3);
           // Estimate text width: roughly 0.7 * fontSize per character (bold text is wider)
           const estimatedTextWidth = label.length * fontSize * 0.7;
 
@@ -371,13 +584,15 @@
           let anchorY = 30;  // Y is always centered (for left/right positions)
 
           if (labelPosition === 'left') {
-            // Coordinate is LEFT of the area (at minX - offset), text should extend LEFT from coordinate
-            // Anchor at the right edge based on estimated text width
-            anchorX = 170 + estimatedTextWidth;  // Anchor at text width + padding, cap at iconSize
+            // Coordinate is LEFT of the area (at minX - offset), text extends LEFT from there
+            // Icon is 300px wide, text is centered at 150px from left edge
+            // Text right edge at 150 + textWidth/2, we want this 20px from coordinate (at anchor)
+            // So: 150 + textWidth/2 = anchorX + 20, thus anchorX = 130 + textWidth/2
+            anchorX = 160 + (estimatedTextWidth / 3);
           } else if (labelPosition === 'right') {
             // Coordinate is RIGHT of the area (at maxX + offset), text should extend RIGHT from coordinate
             // So anchor at LEFT edge of text, text extends right
-            anchorX = 110;  // Anchor at right edge
+            anchorX = 115;  // Anchor at right edge
           } else if (labelPosition === 'top') {
             anchorX = 150;  // Center horizontally
             anchorY = 40;   // Anchor at top
@@ -407,21 +622,40 @@
 
         // Function to update label font size and anchor based on zoom
         function updateLabelSize() {
-          const labelElement = areaLabel.getElement()?.querySelector('div');
-          if (labelElement) {
-            const zoom = map.getZoom();
-            const fontSize = baseFontSize * Math.pow(1.4, zoom - 1);
-            labelElement.style.fontSize = `${fontSize}px`;
+          const zoom = map.getZoom();
+          // Adjust zoom so that zoom -3 (initial view) = scale 1
+          const fontSize = baseFontSize * Math.pow(1.2, zoom + 3);
 
-            // Update the icon anchor
-            const newAnchor = calculateAnchor(zoom);
-            const icon = areaLabel.getIcon();
-            icon.options.iconAnchor = newAnchor;
-            areaLabel.setIcon(icon);
+          // Create new label div with updated font size
+          const newLabelDiv = document.createElement('div');
+          newLabelDiv.style.cssText = `
+            font-weight: bold;
+            font-size: ${fontSize}px;
+            color: #000000;
+            white-space: nowrap;
+            cursor: default;
+            transition: color 0.15s ease-out;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            pointer-events: none;
+          `;
+          newLabelDiv.textContent = label;
 
-            // Reapply color after setIcon (which recreates the element)
-            updateLabelStyle(false, isSelected);
-          }
+          // Update the icon with new HTML and anchor
+          const newAnchor = calculateAnchor(zoom);
+          const newIcon = L.divIcon({
+            className: 'area-label',
+            html: newLabelDiv.outerHTML,
+            iconSize: [300, 60],
+            iconAnchor: newAnchor
+          });
+          areaLabel.setIcon(newIcon);
+
+          // Reapply color after setIcon (which recreates the element)
+          updateLabelStyle(false, isSelected);
         }
 
         // Function to update label style (color only)
@@ -439,7 +673,8 @@
           }
         }
 
-        // Update size on zoom
+        // Update size on zoom (both during and after animation)
+        map.on('zoom', updateLabelSize);
         map.on('zoomend', updateLabelSize);
 
         // Set initial size after a short delay to ensure element is rendered
@@ -661,20 +896,37 @@
           labelFontSize: 12,
           zoomLevel: 3
         },
-        // Safari Zone - Main Label (static, non-interactive, just for display)
+        // Safari Zone - Main Label (clickable, selects all safari zone areas)
         {
           id: 'safari-zone-main-label',
           bounds: [[5860, 300], [6680, 880]], // Use Center bounds for positioning
           label: 'Safari Zone',
           labelPosition: 'bottom',
           labelOffsetY: -100,
-          isStaticLabel: true,
+          isMainLabel: true,
+          mainAreaPolygon: [
+            // TODO: Fill in irregular polygon coordinates
+            // Format: [[x1, y1], [x2, y2], ...]
+            [5030, 1080], // West top left
+            [5790, 1080], // West top right
+            [5790, 1550], // North top left
+            [6740, 1550], // North top right
+            [6740, 1110], // East top left
+            [7610, 1110], // East top right
+            [7610, 530], // East bottom right
+            [6730, 530], // East bottom left
+            [6730, 290], // Center bottom right
+            [5800, 290], // Center bottom left
+            [5800, 480], // West bottom right
+            [5030, 480] // West bottom left
+          ],
+          subAreaIds: ['kanto-safari-zone-area-1-east', 'kanto-safari-zone-area-2-north', 'kanto-safari-zone-area-3-west', 'kanto-safari-zone-center'],
           zoomLevel: 3
         },
         // Route 4
         {
           id: 'kanto-route-4-area',
-          bounds: [[3150, 5278], [4050, 5600]],
+          bounds: [[3150, 5280], [4050, 5600]],
           label: 'Route 4',
           labelPosition: 'bottom',
           zoomLevel: 3
@@ -706,7 +958,7 @@
         // Victory Road - 1F
         {
           id: 'kanto-victory-road-2-1f',
-          bounds: [[400, 5660], [780, 6010]],
+          bounds: [[390, 5655], [790, 6005]],
           label: '1F',
           labelPosition: 'center',
           labelFontSize: 12,
@@ -715,7 +967,7 @@
         // Victory Road - 2F
         {
           id: 'kanto-victory-road-2-2f',
-          bounds: [[790, 5840], [1610, 6210]],
+          bounds: [[790, 5855], [1605, 6205]],
           label: '2F',
           labelPosition: 'center',
           labelFontSize: 12,
@@ -724,26 +976,41 @@
         // Victory Road - 3F
         {
           id: 'kanto-victory-road-2-3f',
-          bounds: [[790, 5490], [1510, 5850]],
+          bounds: [[790, 5490], [1510, 5855]],
           label: '3F',
           labelPosition: 'center',
           labelFontSize: 12,
           zoomLevel: 3
         },
-        // Victory Road - Main Label (static, non-interactive)
+        // Victory Road - Main Label (clickable, selects all victory road areas)
         {
           id: 'victory-road-main-label',
-          bounds: [[790, 5840], [1610, 6210]], // Use 2F bounds for positioning
+          bounds: [[790, 5855], [1605, 6205]], // Use 2F bounds for positioning
           label: 'Victory Road',
           labelPosition: 'top',
           labelOffsetY: 100,
-          isStaticLabel: true,
+          isMainLabel: true,
+          mainAreaPolygon: [
+            // TODO: Fill in irregular polygon coordinates
+            // Format: [[x1, y1], [x2, y2], ...]
+            [380, 6015], // 1F top left
+            [780, 6015], // 1F top right
+            [780, 6215], // 2F top left
+            [1615, 6215], // 2F top right
+            [1615, 5845], // 2F bottom right
+            [1520, 5845], // 3F top right
+            [1520, 5480], // 3F bottom right
+            [780, 5480], // 3F bottom left
+            [780, 5645], // 1F bottom right
+            [380, 5645] // 1F bottom left
+          ],
+          subAreaIds: ['kanto-victory-road-2-1f', 'kanto-victory-road-2-2f', 'kanto-victory-road-2-3f'],
           zoomLevel: 3
         },
         // Seafoam Islands - 1F
         {
           id: 'seafoam-islands-1f',
-          bounds: [[3660, 420], [4250, 780]],
+          bounds: [[3660, 420], [4250, 790]],
           label: '1F',
           labelPosition: 'center',
           labelFontSize: 12,
@@ -761,7 +1028,7 @@
         // Seafoam Islands - B2F
         {
           id: 'seafoam-islands-b2f',
-          bounds: [[3660, 30], [4250, 400]],
+          bounds: [[3660, 20], [4260, 400]],
           label: 'B2F',
           labelPosition: 'center',
           labelFontSize: 12,
@@ -770,7 +1037,7 @@
         // Seafoam Islands - B3F
         {
           id: 'seafoam-islands-b3f',
-          bounds: [[4260, 20], [4890, 400]],
+          bounds: [[4260, 20], [4860, 400]],
           label: 'B3F',
           labelPosition: 'center',
           labelFontSize: 12,
@@ -785,14 +1052,25 @@
           labelFontSize: 12,
           zoomLevel: 3
         },
-        // Seafoam Islands - Main Label (static, non-interactive)
+        // Seafoam Islands - Main Label (clickable, selects all seafoam islands areas)
         {
           id: 'seafoam-islands-main-label',
-          bounds: [[4260, 20], [4890, 400]], // Use B3F bounds for positioning
+          bounds: [[4260, 20], [4860, 400]], // Use B3F bounds for positioning
           label: 'Seafoam Islands',
           labelPosition: 'bottom',
           labelOffsetY: -100,
-          isStaticLabel: true,
+          isMainLabel: true,
+          mainAreaPolygon: [
+            // TODO: Fill in irregular polygon coordinates
+            // Format: [[x1, y1], [x2, y2], ...]
+            [3650, 800], // 1F top left
+            [4870, 800], // B1F top right
+            [4870, 400], // B3F top right
+            [5490, 400], // B4F top right
+            [5490, 10], // B4F bottom right
+            [3650, 10], // B2F bottom left
+          ],
+          subAreaIds: ['seafoam-islands-1f', 'seafoam-islands-b1f', 'seafoam-islands-b2f', 'seafoam-islands-b3f', 'seafoam-islands-b4f'],
           zoomLevel: 3
         },
         // Rock Tunnel - B1F
@@ -813,14 +1091,206 @@
           labelFontSize: 12,
           zoomLevel: 3
         },
-        // Rock Tunnel - Main Label (static, non-interactive)
+        // Rock Tunnel - Main Label (clickable, selects all rock tunnel areas)
         {
           id: 'rock-tunnel-main-label',
           bounds: [[6420, 5620], [7200, 6250]], // Use B1F bounds for positioning
           label: 'Rock Tunnel',
           labelPosition: 'top',
           labelOffsetY: 100,
-          isStaticLabel: true,
+          isMainLabel: true,
+          mainAreaBounds: [[6040, 5620], [7580, 6250]], // Entire rock tunnel bounds
+          subAreaIds: ['rock-tunnel-b1f', 'rock-tunnel-b2f'],
+          zoomLevel: 3
+        },
+        // Route 3
+        {
+          id: 'kanto-route-3-area',
+          bounds: [[1540, 4960], [2880, 5280]],
+          label: 'Route 3',
+          labelPosition: 'top',
+          zoomLevel: 3
+        },
+        // Mt. Moon - 1F
+        {
+          id: 'mt-moon-1f',
+          bounds: [[1710, 5680], [2475, 6310]],
+          label: '1F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Mt. Moon - B1F
+        {
+          id: 'mt-moon-b1f',
+          bounds: [[2475, 5850], [3235, 6175]],
+          label: 'B1F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Mt. Moon - B2F
+        {
+          id: 'mt-moon-b2f',
+          bounds: [[3235, 5695], [4000, 6335]],
+          label: 'B2F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Mt. Moon - Main Label (clickable, selects all mt moon areas)
+        {
+          id: 'mt-moon-main-label',
+          bounds: [[2475, 5850], [3235, 6175]], // Use B1F bounds for positioning
+          label: 'Mt. Moon',
+          labelPosition: 'top',
+          labelOffsetY: 250,
+          isMainLabel: true,
+          mainAreaPolygon: [
+            // TODO: Fill in irregular polygon coordinates
+            // Format: [[x1, y1], [x2, y2], ...]
+            [1700, 6320],
+            [2485, 6320],
+            [2485, 6185],
+            [3225, 6185],
+            [3225, 6345],
+            [4010, 6345],
+            [4010, 5685],
+            [3225, 5685],
+            [3225, 5840],
+            [2485, 5840],
+            [2485, 5670],
+            [1700, 5670]
+          ],
+          subAreaIds: ['mt-moon-1f', 'mt-moon-b1f', 'mt-moon-b2f'],
+          zoomLevel: 3
+        },
+        // Pokemon Mansion - 1F
+        {
+          id: 'pokemon-mansion-1f',
+          bounds: [[1355, 335], [1960, 895]],
+          label: '1F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Pokemon Mansion - 2F
+        {
+          id: 'pokemon-mansion-2f',
+          bounds: [[1355, 900], [1960, 1525]],
+          label: '2F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Pokemon Mansion - 3F
+        {
+          id: 'pokemon-mansion-3f',
+          bounds: [[1970, 395], [2580, 810]],
+          label: '3F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Pokemon Mansion - B1F
+        {
+          id: 'pokemon-mansion-b1f',
+          bounds: [[2590, 335], [3195, 910]],
+          label: 'B1F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Pokemon Mansion - Main Label (clickable, selects all pokemon mansion areas)
+        {
+          id: 'pokemon-mansion-main-label',
+          bounds: [[1355, 900], [1960, 1525]], // Use 2F bounds for positioning
+          label: 'Pokemon Mansion',
+          labelPosition: 'top',
+          labelOffsetY: 100,
+          isMainLabel: true,
+          mainAreaPolygon: [
+            [1345, 1535], // 2F top-left (with padding)
+            [1970, 1535], // 2F top-right
+            [1970, 900],  // 2F/1F connection
+            [1970, 820],  // to 3F
+            [2580, 820],  // 3F top-right
+            [2580, 920],  // to B1F
+            [3205, 920],  // B1F top-right
+            [3205, 325],  // B1F bottom-right
+            [2580, 325],  // B1F bottom-left
+            [2580, 385],  // to 3F
+            [1970, 385],  // 3F bottom-left
+            [1970, 325],  // to 1F
+            [1345, 325],  // 1F bottom-left
+            [1345, 1535]  // back to start
+          ],
+          subAreaIds: ['pokemon-mansion-1f', 'pokemon-mansion-2f', 'pokemon-mansion-3f', 'pokemon-mansion-b1f'],
+          zoomLevel: 3
+        },
+        // Pokemon Tower - 2F
+        {
+          id: 'pokemon-tower-2f',
+          bounds: [[6550, 3400], [6855, 3690]],
+          label: '2F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Pokemon Tower - 3F
+        {
+          id: 'pokemon-tower-3f',
+          bounds: [[6550, 3690], [6855, 3975]],
+          label: '3F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Pokemon Tower - 4F
+        {
+          id: 'pokemon-tower-4f',
+          bounds: [[6550, 3975], [6855, 4265]],
+          label: '4F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Pokemon Tower - 5F
+        {
+          id: 'pokemon-tower-5f',
+          bounds: [[6550, 4265], [6855, 4555]],
+          label: '5F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Pokemon Tower - 6F
+        {
+          id: 'pokemon-tower-6f',
+          bounds: [[6550, 4555], [6855, 4840]],
+          label: '6F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Pokemon Tower - 7F
+        {
+          id: 'pokemon-tower-7f',
+          bounds: [[6550, 4840], [6855, 5130]],
+          label: '7F',
+          labelPosition: 'center',
+          labelFontSize: 12,
+          zoomLevel: 3
+        },
+        // Pokemon Tower - Main Label (clickable, selects all pokemon tower areas)
+        {
+          id: 'pokemon-tower-main-label',
+          bounds: [[6550, 4265], [6855, 4555]], // Use 5F bounds for positioning
+          label: 'Pokemon Tower',
+          labelPosition: 'right',
+          isMainLabel: true,
+          mainAreaBounds: [[6550, 3400], [6855, 5130]], // Entire pokemon tower bounds
+          subAreaIds: ['pokemon-tower-2f', 'pokemon-tower-3f', 'pokemon-tower-4f', 'pokemon-tower-5f', 'pokemon-tower-6f', 'pokemon-tower-7f'],
           zoomLevel: 3
         }
       ];
