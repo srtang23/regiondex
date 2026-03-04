@@ -1,0 +1,1 @@
+Radar graph and encounter level range graph in index.html
