@@ -17,13 +17,169 @@
 
     <style>
       html, body { height: 100%; margin: 0; }
-      #app { height: 100%; display: grid; grid-template-rows: auto 1fr; }
-      #toolbar {
-        display: flex; gap: 12px; align-items: center;
-        padding: 10px 12px; border-bottom: 1px solid #e5e5e5;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      #app {
+        height: 100%;
+        display: flex;
+        position: relative;
       }
-      #map { height: 100%; position: relative; }
+
+      /* Menu Toggle Button */
+      #menu-toggle-btn {
+        position: fixed; /* Changed to fixed so it's always visible */
+        top: 20px;
+        left: 340px; /* 320px sidebar width + 20px */
+        z-index: 1001;
+        background: #FFBD1D;
+        border: none;
+        border-radius: 8px;
+        padding: 12px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        transition: all 0.3s ease-out;
+      }
+      #menu-toggle-btn:hover {
+        background: #F4D995;
+      }
+      #menu-toggle-btn svg {
+        width: 24px;
+        height: 24px;
+      }
+      #hamburger-icon {
+        display: block !important; /* Show hamburger by default when sidebar is hidden */
+      }
+      #close-icon {
+        display: none !important; /* Hide X by default */
+      }
+      #app:not(.sidebar-hidden) #hamburger-icon {
+        display: none !important; /* Hide hamburger when sidebar is shown */
+      }
+      #app:not(.sidebar-hidden) #close-icon {
+        display: block !important; /* Show X when sidebar is shown */
+      }
+      #app.sidebar-hidden #menu-toggle-btn {
+        left: 20px; /* Move to left when sidebar is hidden */
+      }
+
+      #sidebar {
+        width: 320px;
+        height: 100%;
+        background: #F5E6C8;
+        overflow-y: auto;
+        overflow-x: visible; /* Allow button to stick out */
+        transition: all 0.3s ease-out;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+        flex-shrink: 0;
+        position: relative;
+      }
+      #app.sidebar-hidden #sidebar {
+        width: 0;
+        overflow: hidden;
+      }
+
+      #sidebar-content {
+        padding: 20px 20px 20px 20px;
+      }
+
+      .sidebar-title {
+        font-size: 20px;
+        margin-bottom: 20px;
+        color: #000;
+      }
+
+      .filter-section {
+        background: #FFBD1D;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border: 3px solid #8B4513;
+      }
+
+      .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
+        margin-bottom: 12px;
+      }
+
+      .filter-header.collapsed {
+        margin-bottom: 0;
+      }
+
+      .filter-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .filter-content.hidden {
+        display: none;
+      }
+
+      .filter-item {
+        background: #F4D995;
+        border: 2px solid #8B4513;
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+      }
+
+      .filter-item:hover {
+        background: #FFE4A3;
+        transform: translateY(-2px);
+      }
+
+      .filter-item.selected {
+        background: #FFBD1D;
+        border-color: #000;
+        box-shadow: 0 0 0 2px #000;
+      }
+
+      .filter-item img {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+      }
+
+      .filter-item-name {
+        font-size: 10px;
+        margin-top: 8px;
+        word-break: break-word;
+      }
+
+      .add-filter-btn {
+        background: #8B4513;
+        color: #FFF;
+        border: none;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 12px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 12px;
+        font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+      }
+
+      .add-filter-btn:hover {
+        background: #6B3410;
+      }
+
+      #toolbar {
+        display: none; /* Hide old toolbar */
+      }
+      #map {
+        height: 100%;
+        position: relative;
+        flex: 1;
+        transition: all 0.3s ease-out;
+      }
       select, input {
         padding: 6px 8px; border: 1px solid #ccc; border-radius: 8px;
         font-size: 14px;
@@ -78,14 +234,47 @@
   </head>
 
   <body>
-    <div id="app">
-      <div id="toolbar">
-        <div>
-          <label for="pokemonSelect">Pokémon:</label>
-          <select id="pokemonSelect"></select>
+    <div id="app" class="sidebar-hidden">
+      <!-- Sidebar -->
+      <div id="sidebar">
+        <!-- Menu Toggle Button (attached to sidebar) -->
+        <button id="menu-toggle-btn" aria-label="Toggle menu">
+          <svg id="hamburger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <svg id="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <div id="sidebar-content">
+          <h1 class="sidebar-title">Add Filter</h1>
+
+          <!-- Pokemon Filter Section -->
+          <div class="filter-section">
+            <div class="filter-header" id="pokemon-header">
+              <span>Pokémon</span>
+              <span id="pokemon-arrow">▼</span>
+            </div>
+            <div class="filter-content" id="pokemon-content">
+              <!-- Pokemon items will be populated here -->
+            </div>
         </div>
 
-        <div class="muted" id="summary"></div>
+          <!-- Location Filter Section -->
+          <div class="filter-section">
+            <div class="filter-header" id="location-header">
+              <span>Location</span>
+              <span id="location-arrow">▼</span>
+            </div>
+            <div class="filter-content" id="location-content">
+              <!-- Location items will be populated here -->
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="map"></div>
@@ -110,11 +299,16 @@
         crs: L.CRS.Simple,
         minZoom: -3,  // Allow zooming out more to see full image
         maxZoom: 5,  // Increased max zoom for better detail
-        zoomControl: true,
+        zoomControl: false,  // Disable default zoom control
         zoomSnap: 0.5,  // Larger zoom increments for easier manual zooming
         zoomDelta: 1,  // Larger zoom steps (double click, scroll wheel)
         preferCanvas: true,  // Use canvas renderer for better performance
       });
+
+      // Add zoom control to bottom-right
+      L.control.zoom({
+        position: 'bottomright'
+      }).addTo(map);
 
       // Your Kanto map image with optimized rendering
       L.imageOverlay("./full_kanto_map.png", bounds, {
@@ -466,6 +660,12 @@
             isSelected = true;
             currentlySelectedArea = rectangle;
 
+            // Update sidebar item to show selected state
+            const sidebarItem = document.querySelector(`[data-area-id="${id}"]`);
+            if (sidebarItem) {
+              sidebarItem.classList.add('selected');
+            }
+
             // If part of a group, select all areas in the group
             if (group && groupedAreas[group]) {
               groupedAreas[group].forEach(rect => {
@@ -508,6 +708,13 @@
             }
 
             updateLabelStyle(false, false);
+
+            // Update sidebar item to remove selected state
+            const sidebarItem = document.querySelector(`[data-area-id="${id}"]`);
+            if (sidebarItem) {
+              sidebarItem.classList.remove('selected');
+            }
+
             map.flyToBounds([[0, 0], [IMAGE_HEIGHT, IMAGE_WIDTH]], {
               padding: [0, 0],
               maxZoom: 1,
@@ -688,6 +895,12 @@
             weight: 0
           });
           updateLabelStyle(false, false);
+
+          // Update sidebar item to remove selected state
+          const sidebarItem = document.querySelector(`[data-area-id="${id}"]`);
+          if (sidebarItem) {
+            sidebarItem.classList.remove('selected');
+          }
         };
 
         // Track this area in its group if it has one
@@ -1302,6 +1515,199 @@
       map.fitBounds(bounds, {
         padding: [0, 0],  // No padding
         maxZoom: 1  // Don't zoom in too much initially
+      });
+
+      // ===== SIDEBAR MENU FUNCTIONALITY =====
+      const app = document.getElementById('app');
+      const sidebar = document.getElementById('sidebar');
+      const menuToggleBtn = document.getElementById('menu-toggle-btn');
+      const pokemonHeader = document.getElementById('pokemon-header');
+      const pokemonContent = document.getElementById('pokemon-content');
+      const pokemonArrow = document.getElementById('pokemon-arrow');
+      const locationHeader = document.getElementById('location-header');
+      const locationContent = document.getElementById('location-content');
+      const locationArrow = document.getElementById('location-arrow');
+
+      // Toggle sidebar
+      menuToggleBtn.addEventListener('click', () => {
+        app.classList.toggle('sidebar-hidden');
+        // Invalidate map size after transition completes
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 300);
+      });
+
+      // Toggle Pokemon filter section
+      pokemonHeader.addEventListener('click', () => {
+        pokemonContent.classList.toggle('hidden');
+        pokemonHeader.classList.toggle('collapsed');
+        pokemonArrow.textContent = pokemonContent.classList.contains('hidden') ? '▶' : '▼';
+      });
+
+      // Toggle Location filter section
+      locationHeader.addEventListener('click', () => {
+        locationContent.classList.toggle('hidden');
+        locationHeader.classList.toggle('collapsed');
+        locationArrow.textContent = locationContent.classList.contains('hidden') ? '▶' : '▼';
+      });
+
+      // Populate Pokemon filter (sample data - replace with actual Pokemon data)
+      const samplePokemon = [
+        { id: 1, name: 'Bulbasaur', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png' },
+        { id: 4, name: 'Charmander', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png' },
+        { id: 7, name: 'Squirtle', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png' },
+        { id: 10, name: 'Caterpie', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png' },
+        { id: 16, name: 'Pidgey', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/16.png' },
+        { id: 19, name: 'Rattata', sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/19.png' },
+      ];
+
+      samplePokemon.forEach(pokemon => {
+        const item = document.createElement('div');
+        item.className = 'filter-item';
+        item.innerHTML = `
+          <img src="${pokemon.sprite}" alt="${pokemon.name}">
+          <div class="filter-item-name">${pokemon.name}</div>
+        `;
+        item.addEventListener('click', () => {
+          item.classList.toggle('selected');
+          // TODO: Apply filter logic here
+        });
+        pokemonContent.appendChild(item);
+      });
+
+      // Populate Location filter with hierarchy
+      // Group areas by main label
+      const mainAreas = locationAreas.filter(area => area.isMainLabel);
+      const regularAreas = locationAreas.filter(area => !area.isMainLabel && area.label);
+
+      // Create a map of main areas to their sub-areas
+      const areaHierarchy = {};
+      mainAreas.forEach(mainArea => {
+        if (mainArea.subAreaIds) {
+          areaHierarchy[mainArea.label] = mainArea.subAreaIds.map(subId => {
+            const subArea = locationAreas.find(a => a.id === subId);
+            return subArea ? { id: subArea.id, name: subArea.label } : null;
+          }).filter(Boolean);
+        }
+      });
+
+      // Get all locations not in a hierarchy
+      const subAreaIds = new Set(mainAreas.flatMap(m => m.subAreaIds || []));
+      const standaloneAreas = regularAreas
+        .filter(area => !subAreaIds.has(area.id))
+        .map(area => ({ id: area.id, name: area.label, isStandalone: true }));
+
+      // Custom sort function for routes and other locations
+      function sortLocations(a, b) {
+        // Main areas always go to the bottom
+        if (a.isMain && !b.isMain) return 1;
+        if (!a.isMain && b.isMain) return -1;
+
+        // If both are main areas, sort alphabetically
+        if (a.isMain && b.isMain) {
+          return a.name.localeCompare(b.name);
+        }
+
+        // For standalone areas
+        const aName = a.name;
+        const bName = b.name;
+
+        // Extract route numbers if they exist
+        const aRouteMatch = aName.match(/Route (\d+)/);
+        const bRouteMatch = bName.match(/Route (\d+)/);
+
+        // If both are routes, sort numerically
+        if (aRouteMatch && bRouteMatch) {
+          return parseInt(aRouteMatch[1]) - parseInt(bRouteMatch[1]);
+        }
+
+        // If only one is a route, routes come first
+        if (aRouteMatch) return -1;
+        if (bRouteMatch) return 1;
+
+        // Otherwise, sort alphabetically
+        return aName.localeCompare(bName);
+      }
+
+      // Combine and sort
+      const allLocations = [
+        ...Object.entries(areaHierarchy).map(([mainName, subs]) => ({
+          name: mainName,
+          isMain: true,
+          subAreas: subs
+        })),
+        ...standaloneAreas
+      ].sort(sortLocations);
+
+      // Render locations
+      allLocations.forEach(location => {
+        if (location.isMain) {
+          // Main area with sub-areas (collapsible)
+          const mainItem = document.createElement('div');
+          mainItem.className = 'filter-item filter-item-main';
+          mainItem.style.gridColumn = '1 / -1'; // Span full width
+          mainItem.style.background = '#8B4513';
+          mainItem.style.color = '#FFF';
+          mainItem.style.cursor = 'pointer';
+          mainItem.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="filter-item-name">${location.name}</div>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+          `;
+
+          // Container for sub-areas
+          const subContainer = document.createElement('div');
+          subContainer.className = 'sub-areas-container';
+          subContainer.style.gridColumn = '1 / -1';
+          subContainer.style.display = 'none'; // Hidden by default
+
+          // Sub-areas
+          location.subAreas.forEach(subArea => {
+            const subItem = document.createElement('div');
+            subItem.className = 'filter-item filter-item-sub';
+            subItem.style.marginLeft = '10px';
+            subItem.style.marginTop = '8px';
+            subItem.dataset.areaId = subArea.id; // Store area ID for later reference
+            subItem.innerHTML = `<div class="filter-item-name">${subArea.name}</div>`;
+            subItem.addEventListener('click', (e) => {
+              e.stopPropagation(); // Prevent triggering parent collapse
+              // Find the area rectangle and trigger its click
+              const areaRect = allAreas[subArea.id];
+              if (areaRect) {
+                areaRect.fire('click');
+              }
+            });
+            subContainer.appendChild(subItem);
+          });
+
+          // Toggle sub-areas on main item click
+          mainItem.addEventListener('click', () => {
+            const isHidden = subContainer.style.display === 'none';
+            subContainer.style.display = isHidden ? 'grid' : 'none';
+            subContainer.style.gridTemplateColumns = '1fr 1fr';
+            subContainer.style.gap = '12px';
+            const arrow = mainItem.querySelector('.dropdown-arrow');
+            arrow.textContent = isHidden ? '▲' : '▼';
+          });
+
+          locationContent.appendChild(mainItem);
+          locationContent.appendChild(subContainer);
+        } else {
+          // Standalone area
+          const item = document.createElement('div');
+          item.className = 'filter-item';
+          item.dataset.areaId = location.id; // Store area ID for later reference
+          item.innerHTML = `<div class="filter-item-name">${location.name}</div>`;
+          item.addEventListener('click', () => {
+            // Find the area rectangle and trigger its click
+            const areaRect = allAreas[location.id];
+            if (areaRect) {
+              areaRect.fire('click');
+            }
+          });
+          locationContent.appendChild(item);
+        }
       });
 
       // Optional: Add grid overlay for debugging coordinates
