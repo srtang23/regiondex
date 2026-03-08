@@ -29,7 +29,7 @@ let pokemonMarkers = {}; // Store markers by location ID
 
 async function loadEncounterData() {
   try {
-    const response = await fetch('./gen1_red_walk_tidy.csv');
+          const response = await fetch('./data/gen1_red_walk_tidy.csv');
     const csvText = await response.text();
     const lines = csvText.split('\n');
 
@@ -101,7 +101,7 @@ L.control.zoom({
 }).addTo(map);
 
 // Your Kanto map image with optimized rendering
-L.imageOverlay("./full_kanto_map.png", bounds, {
+      L.imageOverlay("./assets/images/full_kanto_map.png", bounds, {
   opacity: 1,
   className: 'high-quality-map',
 }).addTo(map);
