@@ -1,0 +1,1252 @@
+{
+  "cerulean-cave-1f": [
+    {
+      "id": 24,
+      "name": "arbok"
+    },
+    {
+      "id": 132,
+      "name": "ditto"
+    },
+    {
+      "id": 85,
+      "name": "dodrio"
+    },
+    {
+      "id": 42,
+      "name": "golbat"
+    },
+    {
+      "id": 97,
+      "name": "hypno"
+    },
+    {
+      "id": 64,
+      "name": "kadabra"
+    },
+    {
+      "id": 82,
+      "name": "magneton"
+    },
+    {
+      "id": 47,
+      "name": "parasect"
+    },
+    {
+      "id": 26,
+      "name": "raichu"
+    },
+    {
+      "id": 49,
+      "name": "venomoth"
+    }
+  ],
+  "cerulean-cave-2f": [
+    {
+      "id": 113,
+      "name": "chansey"
+    },
+    {
+      "id": 132,
+      "name": "ditto"
+    },
+    {
+      "id": 85,
+      "name": "dodrio"
+    },
+    {
+      "id": 101,
+      "name": "electrode"
+    },
+    {
+      "id": 64,
+      "name": "kadabra"
+    },
+    {
+      "id": 105,
+      "name": "marowak"
+    },
+    {
+      "id": 112,
+      "name": "rhydon"
+    },
+    {
+      "id": 49,
+      "name": "venomoth"
+    },
+    {
+      "id": 40,
+      "name": "wigglytuff"
+    }
+  ],
+  "cerulean-cave-b1f": [
+    {
+      "id": 24,
+      "name": "arbok"
+    },
+    {
+      "id": 113,
+      "name": "chansey"
+    },
+    {
+      "id": 132,
+      "name": "ditto"
+    },
+    {
+      "id": 101,
+      "name": "electrode"
+    },
+    {
+      "id": 105,
+      "name": "marowak"
+    },
+    {
+      "id": 47,
+      "name": "parasect"
+    },
+    {
+      "id": 26,
+      "name": "raichu"
+    },
+    {
+      "id": 112,
+      "name": "rhydon"
+    }
+  ],
+  "digletts-cave-area": [
+    {
+      "id": 50,
+      "name": "diglett"
+    },
+    {
+      "id": 51,
+      "name": "dugtrio"
+    }
+  ],
+  "kanto-route-1-area": [
+    {
+      "id": 16,
+      "name": "pidgey"
+    },
+    {
+      "id": 19,
+      "name": "rattata"
+    }
+  ],
+  "kanto-route-10-area": [
+    {
+      "id": 23,
+      "name": "ekans"
+    },
+    {
+      "id": 21,
+      "name": "spearow"
+    },
+    {
+      "id": 100,
+      "name": "voltorb"
+    }
+  ],
+  "kanto-route-11-area": [
+    {
+      "id": 96,
+      "name": "drowzee"
+    },
+    {
+      "id": 23,
+      "name": "ekans"
+    },
+    {
+      "id": 21,
+      "name": "spearow"
+    }
+  ],
+  "kanto-route-12-area": [
+    {
+      "id": 44,
+      "name": "gloom"
+    },
+    {
+      "id": 43,
+      "name": "oddish"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    },
+    {
+      "id": 48,
+      "name": "venonat"
+    }
+  ],
+  "kanto-route-13-area": [
+    {
+      "id": 132,
+      "name": "ditto"
+    },
+    {
+      "id": 44,
+      "name": "gloom"
+    },
+    {
+      "id": 43,
+      "name": "oddish"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    },
+    {
+      "id": 48,
+      "name": "venonat"
+    }
+  ],
+  "kanto-route-14-area": [
+    {
+      "id": 132,
+      "name": "ditto"
+    },
+    {
+      "id": 44,
+      "name": "gloom"
+    },
+    {
+      "id": 43,
+      "name": "oddish"
+    },
+    {
+      "id": 17,
+      "name": "pidgeotto"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    },
+    {
+      "id": 48,
+      "name": "venonat"
+    }
+  ],
+  "kanto-route-15-area": [
+    {
+      "id": 132,
+      "name": "ditto"
+    },
+    {
+      "id": 44,
+      "name": "gloom"
+    },
+    {
+      "id": 43,
+      "name": "oddish"
+    },
+    {
+      "id": 17,
+      "name": "pidgeotto"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    },
+    {
+      "id": 48,
+      "name": "venonat"
+    }
+  ],
+  "kanto-route-16-area": [
+    {
+      "id": 84,
+      "name": "doduo"
+    },
+    {
+      "id": 20,
+      "name": "raticate"
+    },
+    {
+      "id": 19,
+      "name": "rattata"
+    },
+    {
+      "id": 21,
+      "name": "spearow"
+    }
+  ],
+  "kanto-route-17-area": [
+    {
+      "id": 84,
+      "name": "doduo"
+    },
+    {
+      "id": 22,
+      "name": "fearow"
+    },
+    {
+      "id": 20,
+      "name": "raticate"
+    },
+    {
+      "id": 21,
+      "name": "spearow"
+    }
+  ],
+  "kanto-route-18-area": [
+    {
+      "id": 84,
+      "name": "doduo"
+    },
+    {
+      "id": 22,
+      "name": "fearow"
+    },
+    {
+      "id": 20,
+      "name": "raticate"
+    },
+    {
+      "id": 21,
+      "name": "spearow"
+    }
+  ],
+  "kanto-route-2-south-towards-viridian-city": [
+    {
+      "id": 16,
+      "name": "pidgey"
+    },
+    {
+      "id": 19,
+      "name": "rattata"
+    },
+    {
+      "id": 13,
+      "name": "weedle"
+    }
+  ],
+  "kanto-route-22-area": [
+    {
+      "id": 29,
+      "name": "nidoran-f"
+    },
+    {
+      "id": 32,
+      "name": "nidoran-m"
+    },
+    {
+      "id": 19,
+      "name": "rattata"
+    },
+    {
+      "id": 21,
+      "name": "spearow"
+    }
+  ],
+  "kanto-route-23-area": [
+    {
+      "id": 24,
+      "name": "arbok"
+    },
+    {
+      "id": 132,
+      "name": "ditto"
+    },
+    {
+      "id": 23,
+      "name": "ekans"
+    },
+    {
+      "id": 22,
+      "name": "fearow"
+    },
+    {
+      "id": 21,
+      "name": "spearow"
+    }
+  ],
+  "kanto-route-24-area": [
+    {
+      "id": 63,
+      "name": "abra"
+    },
+    {
+      "id": 14,
+      "name": "kakuna"
+    },
+    {
+      "id": 43,
+      "name": "oddish"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    },
+    {
+      "id": 13,
+      "name": "weedle"
+    }
+  ],
+  "kanto-route-25-area": [
+    {
+      "id": 63,
+      "name": "abra"
+    },
+    {
+      "id": 10,
+      "name": "caterpie"
+    },
+    {
+      "id": 14,
+      "name": "kakuna"
+    },
+    {
+      "id": 11,
+      "name": "metapod"
+    },
+    {
+      "id": 43,
+      "name": "oddish"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    },
+    {
+      "id": 13,
+      "name": "weedle"
+    }
+  ],
+  "kanto-route-3-area": [
+    {
+      "id": 39,
+      "name": "jigglypuff"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    },
+    {
+      "id": 21,
+      "name": "spearow"
+    }
+  ],
+  "kanto-route-4-area": [
+    {
+      "id": 23,
+      "name": "ekans"
+    },
+    {
+      "id": 19,
+      "name": "rattata"
+    },
+    {
+      "id": 21,
+      "name": "spearow"
+    }
+  ],
+  "kanto-route-5-area": [
+    {
+      "id": 56,
+      "name": "mankey"
+    },
+    {
+      "id": 43,
+      "name": "oddish"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    }
+  ],
+  "kanto-route-6-area": [
+    {
+      "id": 56,
+      "name": "mankey"
+    },
+    {
+      "id": 43,
+      "name": "oddish"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    }
+  ],
+  "kanto-route-7-area": [
+    {
+      "id": 58,
+      "name": "growlithe"
+    },
+    {
+      "id": 56,
+      "name": "mankey"
+    },
+    {
+      "id": 43,
+      "name": "oddish"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    }
+  ],
+  "kanto-route-8-area": [
+    {
+      "id": 23,
+      "name": "ekans"
+    },
+    {
+      "id": 58,
+      "name": "growlithe"
+    },
+    {
+      "id": 56,
+      "name": "mankey"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    }
+  ],
+  "kanto-route-9-area": [
+    {
+      "id": 23,
+      "name": "ekans"
+    },
+    {
+      "id": 19,
+      "name": "rattata"
+    },
+    {
+      "id": 21,
+      "name": "spearow"
+    }
+  ],
+  "kanto-safari-zone-area-1-east": [
+    {
+      "id": 84,
+      "name": "doduo"
+    },
+    {
+      "id": 102,
+      "name": "exeggcute"
+    },
+    {
+      "id": 115,
+      "name": "kangaskhan"
+    },
+    {
+      "id": 29,
+      "name": "nidoran-f"
+    },
+    {
+      "id": 32,
+      "name": "nidoran-m"
+    },
+    {
+      "id": 33,
+      "name": "nidorino"
+    },
+    {
+      "id": 46,
+      "name": "paras"
+    },
+    {
+      "id": 47,
+      "name": "parasect"
+    },
+    {
+      "id": 123,
+      "name": "scyther"
+    }
+  ],
+  "kanto-safari-zone-area-2-north": [
+    {
+      "id": 113,
+      "name": "chansey"
+    },
+    {
+      "id": 102,
+      "name": "exeggcute"
+    },
+    {
+      "id": 32,
+      "name": "nidoran-m"
+    },
+    {
+      "id": 30,
+      "name": "nidorina"
+    },
+    {
+      "id": 33,
+      "name": "nidorino"
+    },
+    {
+      "id": 46,
+      "name": "paras"
+    },
+    {
+      "id": 111,
+      "name": "rhyhorn"
+    },
+    {
+      "id": 128,
+      "name": "tauros"
+    },
+    {
+      "id": 49,
+      "name": "venomoth"
+    }
+  ],
+  "kanto-safari-zone-area-3-west": [
+    {
+      "id": 84,
+      "name": "doduo"
+    },
+    {
+      "id": 102,
+      "name": "exeggcute"
+    },
+    {
+      "id": 115,
+      "name": "kangaskhan"
+    },
+    {
+      "id": 29,
+      "name": "nidoran-f"
+    },
+    {
+      "id": 32,
+      "name": "nidoran-m"
+    },
+    {
+      "id": 33,
+      "name": "nidorino"
+    },
+    {
+      "id": 128,
+      "name": "tauros"
+    },
+    {
+      "id": 49,
+      "name": "venomoth"
+    },
+    {
+      "id": 48,
+      "name": "venonat"
+    }
+  ],
+  "kanto-safari-zone-middle": [
+    {
+      "id": 113,
+      "name": "chansey"
+    },
+    {
+      "id": 102,
+      "name": "exeggcute"
+    },
+    {
+      "id": 32,
+      "name": "nidoran-m"
+    },
+    {
+      "id": 30,
+      "name": "nidorina"
+    },
+    {
+      "id": 33,
+      "name": "nidorino"
+    },
+    {
+      "id": 47,
+      "name": "parasect"
+    },
+    {
+      "id": 111,
+      "name": "rhyhorn"
+    },
+    {
+      "id": 123,
+      "name": "scyther"
+    },
+    {
+      "id": 48,
+      "name": "venonat"
+    }
+  ],
+  "kanto-sea-route-21-area": [
+    {
+      "id": 17,
+      "name": "pidgeotto"
+    },
+    {
+      "id": 16,
+      "name": "pidgey"
+    },
+    {
+      "id": 20,
+      "name": "raticate"
+    },
+    {
+      "id": 19,
+      "name": "rattata"
+    },
+    {
+      "id": 114,
+      "name": "tangela"
+    }
+  ],
+  "kanto-victory-road-2-1f": [
+    {
+      "id": 74,
+      "name": "geodude"
+    },
+    {
+      "id": 42,
+      "name": "golbat"
+    },
+    {
+      "id": 75,
+      "name": "graveler"
+    },
+    {
+      "id": 67,
+      "name": "machoke"
+    },
+    {
+      "id": 66,
+      "name": "machop"
+    },
+    {
+      "id": 105,
+      "name": "marowak"
+    },
+    {
+      "id": 95,
+      "name": "onix"
+    },
+    {
+      "id": 41,
+      "name": "zubat"
+    }
+  ],
+  "kanto-victory-road-2-2f": [
+    {
+      "id": 74,
+      "name": "geodude"
+    },
+    {
+      "id": 42,
+      "name": "golbat"
+    },
+    {
+      "id": 75,
+      "name": "graveler"
+    },
+    {
+      "id": 67,
+      "name": "machoke"
+    },
+    {
+      "id": 66,
+      "name": "machop"
+    },
+    {
+      "id": 105,
+      "name": "marowak"
+    },
+    {
+      "id": 95,
+      "name": "onix"
+    },
+    {
+      "id": 41,
+      "name": "zubat"
+    }
+  ],
+  "kanto-victory-road-2-3f": [
+    {
+      "id": 74,
+      "name": "geodude"
+    },
+    {
+      "id": 42,
+      "name": "golbat"
+    },
+    {
+      "id": 75,
+      "name": "graveler"
+    },
+    {
+      "id": 67,
+      "name": "machoke"
+    },
+    {
+      "id": 66,
+      "name": "machop"
+    },
+    {
+      "id": 95,
+      "name": "onix"
+    },
+    {
+      "id": 49,
+      "name": "venomoth"
+    },
+    {
+      "id": 41,
+      "name": "zubat"
+    }
+  ],
+  "mt-moon-1f": [
+    {
+      "id": 35,
+      "name": "clefairy"
+    },
+    {
+      "id": 74,
+      "name": "geodude"
+    },
+    {
+      "id": 46,
+      "name": "paras"
+    },
+    {
+      "id": 41,
+      "name": "zubat"
+    }
+  ],
+  "mt-moon-b1f": [
+    {
+      "id": 35,
+      "name": "clefairy"
+    },
+    {
+      "id": 74,
+      "name": "geodude"
+    },
+    {
+      "id": 46,
+      "name": "paras"
+    },
+    {
+      "id": 41,
+      "name": "zubat"
+    }
+  ],
+  "mt-moon-b2f": [
+    {
+      "id": 35,
+      "name": "clefairy"
+    },
+    {
+      "id": 74,
+      "name": "geodude"
+    },
+    {
+      "id": 46,
+      "name": "paras"
+    },
+    {
+      "id": 41,
+      "name": "zubat"
+    }
+  ],
+  "pokemon-mansion-1f": [
+    {
+      "id": 88,
+      "name": "grimer"
+    },
+    {
+      "id": 58,
+      "name": "growlithe"
+    },
+    {
+      "id": 109,
+      "name": "koffing"
+    },
+    {
+      "id": 89,
+      "name": "muk"
+    },
+    {
+      "id": 77,
+      "name": "ponyta"
+    },
+    {
+      "id": 110,
+      "name": "weezing"
+    }
+  ],
+  "pokemon-mansion-2f": [
+    {
+      "id": 88,
+      "name": "grimer"
+    },
+    {
+      "id": 58,
+      "name": "growlithe"
+    },
+    {
+      "id": 109,
+      "name": "koffing"
+    },
+    {
+      "id": 89,
+      "name": "muk"
+    },
+    {
+      "id": 77,
+      "name": "ponyta"
+    },
+    {
+      "id": 110,
+      "name": "weezing"
+    }
+  ],
+  "pokemon-mansion-3f": [
+    {
+      "id": 88,
+      "name": "grimer"
+    },
+    {
+      "id": 58,
+      "name": "growlithe"
+    },
+    {
+      "id": 109,
+      "name": "koffing"
+    },
+    {
+      "id": 89,
+      "name": "muk"
+    },
+    {
+      "id": 77,
+      "name": "ponyta"
+    },
+    {
+      "id": 110,
+      "name": "weezing"
+    }
+  ],
+  "pokemon-mansion-b1f": [
+    {
+      "id": 88,
+      "name": "grimer"
+    },
+    {
+      "id": 58,
+      "name": "growlithe"
+    },
+    {
+      "id": 109,
+      "name": "koffing"
+    },
+    {
+      "id": 89,
+      "name": "muk"
+    },
+    {
+      "id": 77,
+      "name": "ponyta"
+    },
+    {
+      "id": 110,
+      "name": "weezing"
+    }
+  ],
+  "pokemon-tower-3f": [
+    {
+      "id": 104,
+      "name": "cubone"
+    },
+    {
+      "id": 92,
+      "name": "gastly"
+    },
+    {
+      "id": 93,
+      "name": "haunter"
+    }
+  ],
+  "pokemon-tower-4f": [
+    {
+      "id": 104,
+      "name": "cubone"
+    },
+    {
+      "id": 92,
+      "name": "gastly"
+    },
+    {
+      "id": 93,
+      "name": "haunter"
+    }
+  ],
+  "pokemon-tower-5f": [
+    {
+      "id": 104,
+      "name": "cubone"
+    },
+    {
+      "id": 92,
+      "name": "gastly"
+    },
+    {
+      "id": 93,
+      "name": "haunter"
+    }
+  ],
+  "pokemon-tower-6f": [
+    {
+      "id": 104,
+      "name": "cubone"
+    },
+    {
+      "id": 92,
+      "name": "gastly"
+    },
+    {
+      "id": 93,
+      "name": "haunter"
+    }
+  ],
+  "pokemon-tower-7f": [
+    {
+      "id": 104,
+      "name": "cubone"
+    },
+    {
+      "id": 92,
+      "name": "gastly"
+    },
+    {
+      "id": 93,
+      "name": "haunter"
+    }
+  ],
+  "power-plant-area": [
+    {
+      "id": 125,
+      "name": "electabuzz"
+    },
+    {
+      "id": 81,
+      "name": "magnemite"
+    },
+    {
+      "id": 82,
+      "name": "magneton"
+    },
+    {
+      "id": 25,
+      "name": "pikachu"
+    },
+    {
+      "id": 100,
+      "name": "voltorb"
+    }
+  ],
+  "rock-tunnel-b1f": [
+    {
+      "id": 74,
+      "name": "geodude"
+    },
+    {
+      "id": 66,
+      "name": "machop"
+    },
+    {
+      "id": 95,
+      "name": "onix"
+    },
+    {
+      "id": 41,
+      "name": "zubat"
+    }
+  ],
+  "rock-tunnel-b2f": [
+    {
+      "id": 74,
+      "name": "geodude"
+    },
+    {
+      "id": 66,
+      "name": "machop"
+    },
+    {
+      "id": 95,
+      "name": "onix"
+    },
+    {
+      "id": 41,
+      "name": "zubat"
+    }
+  ],
+  "seafoam-islands-1f": [
+    {
+      "id": 42,
+      "name": "golbat"
+    },
+    {
+      "id": 55,
+      "name": "golduck"
+    },
+    {
+      "id": 116,
+      "name": "horsea"
+    },
+    {
+      "id": 54,
+      "name": "psyduck"
+    },
+    {
+      "id": 86,
+      "name": "seel"
+    },
+    {
+      "id": 90,
+      "name": "shellder"
+    },
+    {
+      "id": 79,
+      "name": "slowpoke"
+    },
+    {
+      "id": 41,
+      "name": "zubat"
+    }
+  ],
+  "seafoam-islands-b1f": [
+    {
+      "id": 87,
+      "name": "dewgong"
+    },
+    {
+      "id": 116,
+      "name": "horsea"
+    },
+    {
+      "id": 117,
+      "name": "seadra"
+    },
+    {
+      "id": 86,
+      "name": "seel"
+    },
+    {
+      "id": 90,
+      "name": "shellder"
+    },
+    {
+      "id": 79,
+      "name": "slowpoke"
+    },
+    {
+      "id": 120,
+      "name": "staryu"
+    }
+  ],
+  "seafoam-islands-b2f": [
+    {
+      "id": 42,
+      "name": "golbat"
+    },
+    {
+      "id": 116,
+      "name": "horsea"
+    },
+    {
+      "id": 86,
+      "name": "seel"
+    },
+    {
+      "id": 90,
+      "name": "shellder"
+    },
+    {
+      "id": 80,
+      "name": "slowbro"
+    },
+    {
+      "id": 79,
+      "name": "slowpoke"
+    },
+    {
+      "id": 120,
+      "name": "staryu"
+    }
+  ],
+  "seafoam-islands-b3f": [
+    {
+      "id": 87,
+      "name": "dewgong"
+    },
+    {
+      "id": 116,
+      "name": "horsea"
+    },
+    {
+      "id": 117,
+      "name": "seadra"
+    },
+    {
+      "id": 86,
+      "name": "seel"
+    },
+    {
+      "id": 90,
+      "name": "shellder"
+    },
+    {
+      "id": 79,
+      "name": "slowpoke"
+    }
+  ],
+  "seafoam-islands-b4f": [
+    {
+      "id": 42,
+      "name": "golbat"
+    },
+    {
+      "id": 116,
+      "name": "horsea"
+    },
+    {
+      "id": 86,
+      "name": "seel"
+    },
+    {
+      "id": 90,
+      "name": "shellder"
+    },
+    {
+      "id": 80,
+      "name": "slowbro"
+    },
+    {
+      "id": 79,
+      "name": "slowpoke"
+    }
+  ],
+  "viridian-forest-area": [
+    {
+      "id": 10,
+      "name": "caterpie"
+    },
+    {
+      "id": 14,
+      "name": "kakuna"
+    },
+    {
+      "id": 11,
+      "name": "metapod"
+    },
+    {
+      "id": 25,
+      "name": "pikachu"
+    },
+    {
+      "id": 13,
+      "name": "weedle"
+    }
+  ]
+}
