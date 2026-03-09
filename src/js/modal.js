@@ -132,6 +132,9 @@ App.showPokemonModal = async function(pokemonName) {
 
   // Generate and display range graph
   App.generateRangeGraph(pokemonName, App.selectedLocationId);
+  
+  // --- TO RENDER YOUR RADAR CHART ---
+  App.renderRadarChart(pokemonName);
 }
 
 /**
@@ -456,6 +459,39 @@ App.generateRangeGraph = async function(pokemonName, locationId = null) {
       });
   } else {
     graphContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Visualization library not loaded.</p>';
+  }
+}
+
+/**
+ * Renders the Altair Radar Chart from your generated JSON files
+ */
+App.renderRadarChart = function(pokemonName) {
+  const chartContainer = document.getElementById('modal-radar-chart');
+  if (!chartContainer) return;
+
+  chartContainer.innerHTML = '<p style="text-align: center; color: #666;">Loading radar chart...</p>';
+
+  // Format the name exactly like your Python script saved it (e.g., nidoran-f)
+  let apiName = pokemonName.toLowerCase()
+    .replace('♀', '-f')
+    .replace('♂', '-m')
+    .replace(/\s+/g, '-')
+    .replace(/'/g, '')
+    .replace(/\./g, '');
+
+  // Point to the JSON files inside your src/assets/charts folder
+  const chartPath = `./src/assets/charts/${apiName}_chart.json`;
+
+  // Use Vega-Embed to render the chart into the div
+  if (typeof vegaEmbed !== 'undefined') {
+    vegaEmbed("#modal-radar-chart", chartPath, { 
+      mode: "vega-lite", 
+      actions: false, // Hides the "View Source" button for a cleaner look
+      tooltip: true
+    }).catch(error => {
+      console.error('Radar chart error:', error);
+      chartContainer.innerHTML = '<p style="text-align: center; color: #666;">Radar chart not available.</p>';
+    });
   }
 }
 

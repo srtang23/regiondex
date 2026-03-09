@@ -426,3 +426,8 @@ select, input {
   font-family: 'Press Start 2P', sans-serif;
   font-size: 16px;
 }
+
+/* Force Altair/Vega tooltips to appear strictly above the Pokemon modal */
+#vg-tooltip-element {
+  z-index: 99999 !important;
+}

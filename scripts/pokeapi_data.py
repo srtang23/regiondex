@@ -4,8 +4,8 @@ import json
 import pandas as pd
 
 # Create a file directory to store the downloaded sprites if it doesn't exist
-os.makedirs("assets/sprites", exist_ok=True)
-os.makedirs("data", exist_ok=True) # For the CSV file that will be created from the dataset
+os.makedirs("src/assets/sprites", exist_ok=True)
+os.makedirs("src/data", exist_ok=True) # For the CSV file that will be created from the dataset
 
 base_url = "https://pokeapi.co/api/v2/generation/1/" # If time permits I can make this include the other gens as well
 pokemon_request = urllib.request.Request(base_url,  headers={'User-Agent': 'Mozilla/5.0'})
