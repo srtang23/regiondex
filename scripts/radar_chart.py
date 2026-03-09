@@ -50,7 +50,7 @@ def generate_all_charts():
     # 3. Loop through every Pokemon and generate the chart
     for index, row in df.iterrows():
         pokemon_name = row['Name']
-        
+
         # Build the stat polygon using the SCALED values, but keep the REAL values for the tooltip
         stat_rows = [{"x": polar_to_xy(row[scale_col], stat_angle(i))[0], 
                       "y": polar_to_xy(row[scale_col], stat_angle(i))[1], 

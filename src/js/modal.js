@@ -135,6 +135,9 @@ App.showPokemonModal = async function(pokemonName) {
   
   // --- TO RENDER YOUR RADAR CHART ---
   App.renderRadarChart(pokemonName);
+
+  // --- TO RENDER YOUR GENDER CHART ---
+  App.renderGenderChart(pokemonName);
 }
 
 /**
@@ -495,3 +498,63 @@ App.renderRadarChart = function(pokemonName) {
   }
 }
 
+/**
+ * Renders the static Tableau PNGs or a Genderless badge
+ */
+App.renderGenderChart = function(pokemonName) {
+  const container = document.getElementById('modal-gender-chart');
+  if (!container) return;
+
+  // Format the name
+  let apiName = pokemonName.toLowerCase()
+    .replace('♀', '-f')
+    .replace('♂', '-m')
+    .replace(/\s+/g, '-')
+    .replace(/'/g, '')
+    .replace(/\./g, '');
+
+  // 1. Check if Genderless
+  const genderless = [
+    'magnemite', 'magneton', 'voltorb', 'electrode', 'staryu', 'starmie', 
+    'porygon', 'ditto', 'articuno', 'zapdos', 'moltres', 'mewtwo', 'mew'
+  ];
+
+  if (genderless.includes(apiName)) {
+    container.innerHTML = `
+      <div style="text-align: center; border: 3px dashed #8B4513; background-color: #F5E6C8; padding: 20px; border-radius: 8px; width: 80%; margin: 0 auto;">
+        <span style="font-size: 32px;">⚪</span>
+        <p style="font-family: 'Press Start 2P', sans-serif; font-size: 10px; color: #8B4513; margin-top: 15px; line-height: 1.5;">GENDER UNKNOWN /<br>GENDERLESS</p>
+      </div>
+    `;
+    return;
+  }
+
+  // 2. Arrays for the unique ratios
+  const female100 = ['nidoran-f', 'nidorina', 'nidoqueen', 'chansey', 'kangaskhan', 'jynx'];
+  const male100 = ['nidoran-m', 'nidorino', 'nidoking', 'hitmonlee', 'hitmonchan', 'tauros'];
+  const male87 = ['bulbasaur', 'ivysaur', 'venusaur', 'charmander', 'charmeleon', 'charizard', 'squirtle', 'wartortle', 'blastoise', 'eevee', 'vaporeon', 'jolteon', 'flareon', 'omanyte', 'omastar', 'kabuto', 'kabutops', 'aerodactyl', 'snorlax'];
+  const male75 = ['growlithe', 'arcanine', 'abra', 'kadabra', 'alakazam', 'machop', 'machoke', 'machamp'];
+  const female75 = ['vulpix', 'ninetales', 'clefairy', 'clefable', 'jigglypuff', 'wigglytuff'];
+
+  // 3. Assign the correct Tableau PNG filename
+  let imageName = 'ratio-50-50'; // Default for the vast majority of Pokemon
+  
+  if (female100.includes(apiName)) imageName = 'ratio-100-f';
+  else if (male100.includes(apiName)) imageName = 'ratio-100-m';
+  else if (male87.includes(apiName)) imageName = 'ratio-75-m'; // Safely points to 75-m
+  else if (male75.includes(apiName)) imageName = 'ratio-75-m';
+  else if (female75.includes(apiName)) imageName = 'ratio-75-f';
+
+  // 4. Render the image from your specific folder
+  const imagePath = `./src/assets/genders/${imageName}.png`;
+
+  container.innerHTML = `
+    <div style="text-align: center; width: 100%;">
+      <p style="font-family: 'Press Start 2P', sans-serif; font-size: 12px; color: #8B4513; margin-bottom: 15px;">GENDER RATIO</p>
+      <img src="${imagePath}" 
+           alt="Gender Ratio" 
+           style="max-width: 100%; max-height: 200px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));"
+           onerror="this.onerror=null; this.parentElement.innerHTML='<p style=\\'color:#666; font-family: sans-serif; font-size: 12px;\\'>Chart image not found.</p>';">
+    </div>
+  `;
+};
