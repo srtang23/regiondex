@@ -23,7 +23,7 @@ Then open http://localhost:8000 in your browser.
 
 ## Usage
 
-1. Open the website in a browser (via localhost server)
+1. Open the website in a browser
 2. Use the sidebar to filter by Pokémon or browse locations
 3. Click on location areas to see Pokémon encounters
 4. Click on any Pokémon sprite to view details and level ranges
