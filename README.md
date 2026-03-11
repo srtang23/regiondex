@@ -10,7 +10,7 @@ You'll need the high-resolution map image:
 - **full_kanto_map.png**  - Not included in the repository due to file size
 - Place it in the root directory of this project
 
-### Running the Application
+### Running locally
 
 Start a local server:
 ```bash
