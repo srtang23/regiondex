@@ -132,7 +132,7 @@ App.showPokemonModal = async function(pokemonName) {
 
   // Generate and display range graph
   App.generateRangeGraph(pokemonName, App.selectedLocationId);
-  
+
   // --- TO RENDER YOUR RADAR CHART ---
   App.renderRadarChart(pokemonName);
 
@@ -302,18 +302,6 @@ App.generateRangeGraph = async function(pokemonName, locationId = null) {
         "field": "level_range",
         "title": "Level Range",
         "type": "nominal"
-      },
-      {
-        "field": "min_level",
-        "title": "Min",
-        "type": "quantitative",
-        "format": "d"
-      },
-      {
-        "field": "max_level",
-        "title": "Max",
-        "type": "quantitative",
-        "format": "d"
       },
       {
         "field": "chance",
@@ -487,8 +475,8 @@ App.renderRadarChart = function(pokemonName) {
 
   // Use Vega-Embed to render the chart into the div
   if (typeof vegaEmbed !== 'undefined') {
-    vegaEmbed("#modal-radar-chart", chartPath, { 
-      mode: "vega-lite", 
+    vegaEmbed("#modal-radar-chart", chartPath, {
+      mode: "vega-lite",
       actions: false, // Hides the "View Source" button for a cleaner look
       tooltip: true
     }).catch(error => {
@@ -515,7 +503,7 @@ App.renderGenderChart = function(pokemonName) {
 
   // 1. Check if Genderless
   const genderless = [
-    'magnemite', 'magneton', 'voltorb', 'electrode', 'staryu', 'starmie', 
+    'magnemite', 'magneton', 'voltorb', 'electrode', 'staryu', 'starmie',
     'porygon', 'ditto', 'articuno', 'zapdos', 'moltres', 'mewtwo', 'mew'
   ];
 
@@ -538,7 +526,7 @@ App.renderGenderChart = function(pokemonName) {
 
   // 3. Assign the correct Tableau PNG filename
   let imageName = 'ratio-50-50'; // Default for the vast majority of Pokemon
-  
+
   if (female100.includes(apiName)) imageName = 'ratio-100-f';
   else if (male100.includes(apiName)) imageName = 'ratio-100-m';
   else if (male87.includes(apiName)) imageName = 'ratio-75-m'; // Safely points to 75-m
@@ -551,8 +539,8 @@ App.renderGenderChart = function(pokemonName) {
   container.innerHTML = `
     <div style="text-align: center; width: 100%;">
       <p style="font-family: 'Press Start 2P', sans-serif; font-size: 12px; color: #8B4513; margin-bottom: 15px;">GENDER RATIO</p>
-      <img src="${imagePath}" 
-           alt="Gender Ratio" 
+      <img src="${imagePath}"
+           alt="Gender Ratio"
            style="max-width: 100%; max-height: 200px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));"
            onerror="this.onerror=null; this.parentElement.innerHTML='<p style=\\'color:#666; font-family: sans-serif; font-size: 12px;\\'>Chart image not found.</p>';">
     </div>
