@@ -1,4 +1,4 @@
-# Regiondex - Pokémon Encounter Map
+# RegionDex - Pokémon Encounter Map
 
 An interactive map showing Pokémon encounter locations from Generation 1 (Red version).
 
