@@ -16,14 +16,24 @@ html, body { height: 100%; margin: 0; }
   z-index: 1001;
   background: #FFBD1D;
   border: none;
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 12px;
+  padding: 10px 16px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   transition: all 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 #menu-toggle-btn:hover {
   background: #F4D995;
+  transform: translateY(-2px);
+}
+#menu-title {
+  font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: #8B4513; 
+  margin-top: -3px; 
 }
 #menu-toggle-btn svg {
   width: 24px;
@@ -319,10 +329,10 @@ select, input {
 
 #pokemon-modal {
   background: #E07451;
-  width: 800px;
+  width: 850px;
   max-width: 90%;
-  height: 500px;
-  max-height: 90%;
+  height: 580px;
+  max-height: 85vh;
   border-radius: 20px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   position: relative;
@@ -360,7 +370,10 @@ select, input {
 
 .modal-left-col {
   width: 35%;
-  padding: 40px 20px;
+  height: 100%; 
+  overflow: hidden; 
+  box-sizing: border-box; 
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -369,10 +382,12 @@ select, input {
 }
 
 .modal-pokemon-image {
-  width: 250px;
-  height: 250px;
+  width: 100%;
+  max-width: 200px
+  height: auto;
+  max-height: 200px;
   object-fit: contain;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
@@ -381,7 +396,7 @@ select, input {
 
 .modal-pokemon-name {
   font-size: 24px;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
   text-transform: capitalize;
   text-align: center;
   text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
@@ -390,10 +405,11 @@ select, input {
 .modal-stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15px 30px;
-  font-size: 12px;
+  gap: 15px 10px;
+  align-items: start;
+  font-size: 11.5px;
   width: 100%;
-  max-width: 300px;
+  max-width: 100%;
 }
 
 .modal-stat-label {
@@ -404,16 +420,21 @@ select, input {
 .modal-right-col {
   flex: 1;
   background: white;
-  margin: 20px;
+  margin: 20px 20px 20px 0;
+  height: calc(100% - 40px);
   border-radius: 16px;
   position: relative;
   padding: 20px;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 #modal-range-graph {
   width: 100%;
   min-height: 200px;
+  display: flex;
+  justify-content: center; 
+  align-items: center;
 }
 
 /* Loading state */

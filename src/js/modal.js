@@ -2,7 +2,7 @@
 
 // Create App namespace if it doesn't exist
 window.App = window.App || {};
-
+App.pokemonCache = {};
 // Initialize modal elements and event listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   // Modal elements
@@ -84,10 +84,16 @@ App.showPokemonModal = async function(pokemonName) {
   else apiName = apiName.replace(/\s+/g, '-').replace(/'/g, '').replace(/\./g, '');
 
   try {
-    // Fetch Pokemon data
-    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${apiName}`);
-    if (!response.ok) throw new Error('Pokemon not found');
-    const data = await response.json();
+    // 1. CACHE SYSTEM (Fetch once!)
+    let data;
+    if (App.pokemonCache[apiName]) {
+      data = App.pokemonCache[apiName]; // Load instantly from memory
+    } else {
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${apiName}`);
+      if (!response.ok) throw new Error('Pokemon not found');
+      data = await response.json();
+      App.pokemonCache[apiName] = data; // Save it for next time
+    }
 
     // Image is already set, no need to update
 
@@ -108,6 +114,72 @@ App.showPokemonModal = async function(pokemonName) {
     // Update Ability (use first ability)
     const abilityName = data.abilities[0].ability.name.replace('-', ' ');
     App.modalAbility.textContent = abilityName.charAt(0).toUpperCase() + abilityName.slice(1);
+
+    // Type colors for potential future use (e.g., background or badges)
+    const typeColors = {
+      normal: '#A8A878', fire: '#F08030', water: '#6890F0', electric: '#F8D030',
+      grass: '#78C850', ice: '#98D8D8', fighting: '#C03028', poison: '#A040A0',
+      ground: '#E0C068', flying: '#A890F0', psychic: '#F85888', bug: '#A8B820',
+      rock: '#B8A038', ghost: '#705898', dragon: '#7038F8'
+    };
+
+    const createBadge = (typeName, extraText = '') => {
+      const color = typeColors[typeName.toLowerCase()] || '#A8A878';
+      const text = (typeName + ' ' + extraText).trim().toUpperCase();
+      return `<span style="display: inline-block; background-color: ${color}; color: white; padding: 3px 6px; margin: 2px 2px 2px 0; border-radius: 4px; font-size: 10px; font-family: sans-serif; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.6); box-shadow: inset 0 -1px 2px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.2);">${text}</span>`;
+    };
+
+    // Update Type(s)
+    const types = data.types.map(t => t.type.name);
+    const modalTypeEl = document.getElementById('modal-type');
+    if (modalTypeEl) {
+      // Use .innerHTML instead of .textContent so the HTML badges render
+      modalTypeEl.innerHTML = types.map(t => createBadge(t)).join('');
+    }
+    const typeInteractions = {
+      normal:  { w: ['fighting'], r: [], i: ['ghost'] },
+      fire:    { w: ['water', 'ground', 'rock'], r: ['fire', 'grass', 'bug'], i: [] },
+      water:   { w: ['electric', 'grass'], r: ['water', 'fire', 'ice'], i: [] },
+      electric:{ w: ['ground'], r: ['electric', 'flying'], i: [] },
+      grass:   { w: ['fire', 'ice', 'poison', 'flying', 'bug'], r: ['water', 'electric', 'grass', 'ground'], i: [] },
+      ice:     { w: ['fire', 'fighting', 'rock'], r: ['ice'], i: [] },
+      fighting:{ w: ['flying', 'psychic'], r: ['bug', 'rock'], i: [] },
+      poison:  { w: ['ground', 'psychic', 'bug'], r: ['grass', 'fighting', 'poison'], i: [] },
+      ground:  { w: ['water', 'grass', 'ice'], r: ['poison', 'rock'], i: ['electric'] },
+      flying:  { w: ['electric', 'ice', 'rock'], r: ['grass', 'fighting', 'bug'], i: ['ground'] },
+      psychic: { w: ['bug'], r: ['fighting', 'psychic'], i: ['ghost'] }, 
+      bug:     { w: ['fire', 'flying', 'rock', 'poison'], r: ['grass', 'fighting', 'ground'], i: [] },
+      rock:    { w: ['water', 'grass', 'fighting', 'ground'], r: ['normal', 'fire', 'poison', 'flying'], i: [] },
+      ghost:   { w: ['ghost'], r: ['poison', 'bug'], i: ['normal', 'fighting'] },
+      dragon:  { w: ['ice', 'dragon'], r: ['fire', 'water', 'electric', 'grass'], i: [] }
+    };
+
+    // Start every attacking type at a 1x damage multiplier
+    const allTypes = Object.keys(typeInteractions);
+    let multipliers = {};
+    allTypes.forEach(t => multipliers[t] = 1);
+
+    // Multiply weaknesses (x2), resistances (x0.5), and immunities (x0) for BOTH types
+    types.forEach(defendingType => {
+      const traits = typeInteractions[defendingType];
+      if (traits) {
+        traits.w.forEach(t => multipliers[t] *= 2);
+        traits.r.forEach(t => multipliers[t] *= 0.5);
+        traits.i.forEach(t => multipliers[t] *= 0);
+      }
+    });
+
+    // Only keep the types that ended up doing more than 1x damage (2x or 4x)
+    const finalWeaknesses = allTypes
+      .filter(t => multipliers[t] > 1)
+      .map(t => createBadge(t, `(${multipliers[t]}x)`)) // Uses badge function for weaknesses too, with multiplier text
+      .join('');
+
+    // Display the final calculated list
+    const modalWeaknessEl = document.getElementById('modal-weakness');
+    if (modalWeaknessEl) {
+      modalWeaknessEl.innerHTML = finalWeaknesses.length > 0 ? finalWeaknesses : '<span style="font-size: 12px; color: #666;">None</span>';
+    }
 
     // Fetch Species data for Category
     const speciesResponse = await fetch(data.species.url);
@@ -363,7 +435,7 @@ App.generateRangeGraph = async function(pokemonName, locationId = null) {
       "title": {
         "fontSize": 13,
         "fontWeight": "bold",
-        "anchor": "start",
+        "anchor": "middle",
         "offset": 10
       },
       "tooltip": {
@@ -517,32 +589,51 @@ App.renderGenderChart = function(pokemonName) {
     return;
   }
 
-  // 2. Arrays for the unique ratios
+  // 2. Arrays for the unique ratios 
   const female100 = ['nidoran-f', 'nidorina', 'nidoqueen', 'chansey', 'kangaskhan', 'jynx'];
   const male100 = ['nidoran-m', 'nidorino', 'nidoking', 'hitmonlee', 'hitmonchan', 'tauros'];
   const male87 = ['bulbasaur', 'ivysaur', 'venusaur', 'charmander', 'charmeleon', 'charizard', 'squirtle', 'wartortle', 'blastoise', 'eevee', 'vaporeon', 'jolteon', 'flareon', 'omanyte', 'omastar', 'kabuto', 'kabutops', 'aerodactyl', 'snorlax'];
   const male75 = ['growlithe', 'arcanine', 'abra', 'kadabra', 'alakazam', 'machop', 'machoke', 'machamp'];
   const female75 = ['vulpix', 'ninetales', 'clefairy', 'clefable', 'jigglypuff', 'wigglytuff'];
 
-  // 3. Assign the correct Tableau PNG filename
-  let imageName = 'ratio-50-50'; // Default for the vast majority of Pokemon
+  // 3. Assign the correct Tableau PNG filename AND dynamic legend text
+  let imageName = 'ratio-50-50'; // Default
+  let legendHTML = `<span style="color: #6390F0;">♂ 50% Male</span> &nbsp;|&nbsp; <span style="color: #F95587;">♀ 50% Female</span>`;
 
-  if (female100.includes(apiName)) imageName = 'ratio-100-f';
-  else if (male100.includes(apiName)) imageName = 'ratio-100-m';
-  else if (male87.includes(apiName)) imageName = 'ratio-75-m'; // Safely points to 75-m
-  else if (male75.includes(apiName)) imageName = 'ratio-75-m';
-  else if (female75.includes(apiName)) imageName = 'ratio-75-f';
+  if (female100.includes(apiName)) {
+    imageName = 'ratio-100-f';
+    legendHTML = `<span style="color: #F95587;">♀ 100% Female</span>`;
+  } else if (male100.includes(apiName)) {
+    imageName = 'ratio-100-m';
+    legendHTML = `<span style="color: #6390F0;">♂ 100% Male</span>`;
+  } else if (male87.includes(apiName)) {
+    imageName = 'ratio-75-m';
+    legendHTML = `<span style="color: #6390F0;">♂ 87.5% Male</span> &nbsp;|&nbsp; <span style="color: #F95587;">♀ 12.5% Female</span>`;
+  } else if (male75.includes(apiName)) {
+    imageName = 'ratio-75-m';
+    legendHTML = `<span style="color: #6390F0;">♂ 75% Male</span> &nbsp;|&nbsp; <span style="color: #F95587;">♀ 25% Female</span>`;
+  } else if (female75.includes(apiName)) {
+    imageName = 'ratio-75-f';
+    legendHTML = `<span style="color: #F95587;">♀ 75% Female</span> &nbsp;|&nbsp; <span style="color: #6390F0;">♂ 25% Male</span>`;
+  }
 
-  // 4. Render the image from your specific folder
+  // 4. Render the image (Square Crop) and the HTML Legend
   const imagePath = `./src/assets/genders/${imageName}.png`;
 
   container.innerHTML = `
     <div style="text-align: center; width: 100%;">
-      <p style="font-family: 'Press Start 2P', sans-serif; font-size: 12px; color: #8B4513; margin-bottom: 15px;">GENDER RATIO</p>
-      <img src="${imagePath}"
-           alt="Gender Ratio"
-           style="max-width: 100%; max-height: 200px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));"
+      <p style="font-family: 'Press Start 2P', sans-serif; font-size: 11px; color: #8B4513; margin-bottom: 10px;">GENDER RATIO</p>
+      
+      <img src="${imagePath}" 
+           alt="Gender Ratio" 
+           style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); margin-bottom: 15px;"
            onerror="this.onerror=null; this.parentElement.innerHTML='<p style=\\'color:#666; font-family: sans-serif; font-size: 12px;\\'>Chart image not found.</p>';">
+           
+      <div>
+        <div style="font-family: sans-serif; font-size: 12px; font-weight: bold; background: #f5f5f5; padding: 6px 16px; border-radius: 20px; display: inline-block; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          ${legendHTML}
+        </div>
+      </div>
     </div>
   `;
 };
